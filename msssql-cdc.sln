@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{69F94C69-D4A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsSqlCdc", "src\MsSqlCdc\MsSqlCdc.csproj", "{5349AA55-B231-44AA-B411-97590DB9BA49}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{5DFEC30A-0E3B-42CA-A0EA-6743821DE000}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "examples\Example\Example.csproj", "{7DC5DA8F-274F-4586-97F4-490E0F12AE09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{5349AA55-B231-44AA-B411-97590DB9BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5349AA55-B231-44AA-B411-97590DB9BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5349AA55-B231-44AA-B411-97590DB9BA49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DC5DA8F-274F-4586-97F4-490E0F12AE09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC5DA8F-274F-4586-97F4-490E0F12AE09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DC5DA8F-274F-4586-97F4-490E0F12AE09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DC5DA8F-274F-4586-97F4-490E0F12AE09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5349AA55-B231-44AA-B411-97590DB9BA49} = {69F94C69-D4A8-4347-BCF6-A28CA7A2EBA4}
+		{7DC5DA8F-274F-4586-97F4-490E0F12AE09} = {5DFEC30A-0E3B-42CA-A0EA-6743821DE000}
 	EndGlobalSection
 EndGlobal
