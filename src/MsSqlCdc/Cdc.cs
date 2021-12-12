@@ -1,127 +1,88 @@
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 
 namespace MsSqlCdc;
 
-public static class Cdc
+public class Cdc
 {
-    public static async Task<long> GetNextLsn(SqlConnection connection, long lsn)
+    /// <summary>
+    /// Returns the start_lsn column value for the specified capture instance from the cdc.change_tables system table.
+    /// This value represents the low endpoint of the validity interval for the capture instance.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="captureInstance">The name of the capture instance.</param>
+    /// <returns>Returns the CDC column as a ChangeData record.</returns>
+    public static async Task<long> GetMinLsn(SqlConnection connection, string captureInstance)
     {
-        var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn) AS next_lsn";
-
-        using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn);
-
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
-
-        long minLsn = 0;
-        while (await reader.ReadAsync())
-        {
-            minLsn = DataConvert.ConvertBinaryLsn((byte[])reader["next_lsn"]);
-        }
-
-        return minLsn;
+        var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance);
+        return DataConvert.ConvertBinaryLsn(minLsnBytes);
     }
 
-    public static async Task<long> GetMinLsn(SqlConnection connection, string captureInstanceName)
-    {
-        var sql = "SELECT sys.fn_cdc_get_min_lsn(@capture_instance) AS min_lsn";
-
-        using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@capture_instance", captureInstanceName);
-
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
-
-        long minLsn = 0;
-        while (await reader.ReadAsync())
-        {
-            minLsn = DataConvert.ConvertBinaryLsn((byte[])reader["min_lsn"]);
-        }
-
-        return minLsn;
-    }
-
+    /// <summary>
+    /// Returns the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table.
+    /// You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<long> GetMaxLsn(SqlConnection connection)
     {
-        var sql = "SELECT sys.fn_cdc_get_max_lsn() AS max_lsn";
-
-        using var command = new SqlCommand(sql, connection);
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
-
-        long maxLsn = 0;
-        while (await reader.ReadAsync())
-        {
-            maxLsn = DataConvert.ConvertBinaryLsn((byte[])reader["max_lsn"]);
-        }
-
-        return maxLsn;
+        var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection);
+        return DataConvert.ConvertBinaryLsn(maxLsnBytes);
     }
 
+    /// <summary>
+    /// Returns the next log sequence number (LSN) in the sequence based upon the specified LSN.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="lsn">The LSN number that should be used as the point to get the next LSN.</param>
+    /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
+    public static async Task<long> GetNextLsn(SqlConnection connection, long lsn)
+    {
+        var nextLsnBytes = await CdcDatabase.GetNextLsn(connection, lsn);
+        return DataConvert.ConvertBinaryLsn(nextLsnBytes);
+    }
 
+    /// <summary>
+    /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="captureInstance">The name of the capture instance.</param>
+    /// <param name="fromLsn">The LSN that represents the low endpoint of the LSN range to include in the result set.</param>
+    /// <param name="toLsn">The LSN that represents the high endpoint of the LSN range to include in the result set.</param>
+    /// <returns>
+    /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
+    /// </returns>
+    public static async Task<IReadOnlyCollection<ChangeData<dynamic>>> GetNetChanges(
+        SqlConnection connection,
+        string captureInstance,
+        long fromLsn,
+        long toLsn)
+    {
+        var cdcColumns = await CdcDatabase.GetNetChanges(connection, captureInstance, fromLsn, toLsn);
+        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
+    }
+
+    /// <summary>
+    /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
+    /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="captureInstance">The name of the capture instance.</param>
+    /// <param name="fromLsn">The LSN that represents the low endpoint of the LSN range to include in the result set.</param>
+    /// <param name="toLsn">The LSN that represents the high endpoint of the LSN range to include in the result set.</param>
+    /// <returns>
+    /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
+    /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
+    /// </returns>
     public static async Task<IReadOnlyCollection<ChangeData<dynamic>>> GetAllChanges(
         SqlConnection connection,
         string tableName,
         long beginLsn,
         long endLsn)
     {
-        var builder = new SqlCommandBuilder();
-        // We have to do this here, since we cannot pass the function as command parameter.
-        var cdcFunction = builder.UnquoteIdentifier($"cdc.fn_cdc_get_all_changes_{tableName}");
-        var sql = $"SELECT * FROM {cdcFunction}(@begin_lsn, @end_lsn, 'all update old')";
-
-        using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@begin_lsn", beginLsn);
-        command.Parameters.AddWithValue("@end_lsn", endLsn);
-
-        return await GetChanges(command, tableName);
-    }
-
-    public static async Task<IReadOnlyCollection<ChangeData<dynamic>>> GetNetChanges(
-        SqlConnection connection,
-        string tableName,
-        long beginLsn,
-        long endLsn)
-    {
-        var builder = new SqlCommandBuilder();
-        // We have to do this here, since we cannot pass the function as command parameter.
-        var cdcFunction = builder.UnquoteIdentifier($"cdc.fn_cdc_get_net_changes_{tableName}");
-        var sql = $"SELECT * FROM {cdcFunction}(@begin_lsn, @end_lsn, 'all update old')";
-
-        using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@begin_lsn", beginLsn);
-        command.Parameters.AddWithValue("@end_lsn", endLsn);
-
-        return await GetChanges(command, tableName);
-    }
-
-    private static async Task<IReadOnlyCollection<ChangeData<dynamic>>> GetChanges(SqlCommand command, string tableName)
-    {
-        var changes = new List<ChangeData<dynamic>>();
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var startLsn = DataConvert.ConvertBinaryLsn((byte[])reader["__$start_lsn"]);
-            var seqVal = DataConvert.ConvertBinaryLsn((byte[])reader["__$seqval"]);
-            var operation = DataConvert.ConvertIntOperation((int)reader["__$operation"]);
-            var updateMask = Encoding.UTF8.GetString((byte[])reader["__$update_mask"]);
-
-            // We use dynamic object here because in this configuration
-            // the columns are not mapped to concrete types.
-            var body = new ExpandoObject() as IDictionary<string, Object>;
-
-            // We start from 4 since we already mapped the 4 first values and the rest of the values are dynamic.
-            for (var i = 4; i < reader.FieldCount; i++)
-            {
-                body[reader.GetName(i)] = reader.GetValue(i);
-            }
-
-            changes.Add(new(startLsn, seqVal, operation, updateMask, tableName, body));
-        }
-
-        return changes;
+        var cdcColumns = await CdcDatabase.GetAllChanges(connection, tableName, beginLsn, endLsn);
+        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, tableName)).ToList();
     }
 }
