@@ -1,6 +1,8 @@
 # Microsoft SQL - Change Data Capture (CDC)
 
-NOTE: Should not be used yet, still under development.
+NOTE: Still under development, API might change until stable release.
+
+You can get the NuGet package [here.](https://www.nuget.org/packages/MsSqlCdc)
 
 The MS-SQL change data capture library, integrates with MSSQL through its change data capture (CDC) system. It checks a range of specified CDC groups that each contains multiple CDC tables and streams the changesets in order based on the sequence number from the database log. The library aims only to handle the CDC integration with the datasource and therefore not the destination of the event stream.
 
