@@ -1,4 +1,3 @@
-
 version: 2.1
 
 executors:
@@ -30,8 +29,8 @@ jobs:
           name: Push to NuGet
           command: |
             cd src/Typesense
-            dotnet pack -o ./publish --no-dependencies -c Release -p:PackageVersion=${CIRCLE_TAG}
-            dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
+            dotnet pack src/MsSqlCdc/MsSqlCdc.csproj -o ./publish --no-dependencies -c Release -p:PackageVersion=${CIRCLE_TAG}
+            dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/MsSqlCdc.nupkg"
 workflows:
   build-test-publish_nuget:
     jobs:
