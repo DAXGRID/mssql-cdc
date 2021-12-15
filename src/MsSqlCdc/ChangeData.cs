@@ -2,7 +2,7 @@ using System;
 
 namespace MsSqlCdc;
 
-public enum Operation : ushort
+public enum Operation
 {
     Delete = 1,
     Insert = 2,
