@@ -78,11 +78,11 @@ public class Cdc
     /// </returns>
     public static async Task<IReadOnlyCollection<ChangeData<dynamic>>> GetAllChanges(
         SqlConnection connection,
-        string tableName,
+        string captureInstance,
         long beginLsn,
         long endLsn)
     {
-        var cdcColumns = await CdcDatabase.GetAllChanges(connection, tableName, beginLsn, endLsn);
-        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, tableName)).ToList();
+        var cdcColumns = await CdcDatabase.GetAllChanges(connection, captureInstance, beginLsn, endLsn);
+        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
 }
