@@ -5,7 +5,7 @@ using System;
 
 namespace MsSqlCdc;
 
-public static class CdcDatabase
+internal static class CdcDatabase
 {
     public static async Task<byte[]> GetMinLsn(SqlConnection connection, string captureInstance)
     {
@@ -16,7 +16,7 @@ public static class CdcDatabase
 
         using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-        var minLsn = new byte[8];
+        var minLsn = new byte[10];
         while (await reader.ReadAsync())
         {
             minLsn = (byte[])reader["min_lsn"];
@@ -32,7 +32,7 @@ public static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-        var maxLsn = new byte[8];
+        var maxLsn = new byte[10];
         while (await reader.ReadAsync())
         {
             maxLsn = (byte[])reader["max_lsn"];
@@ -50,7 +50,7 @@ public static class CdcDatabase
 
         using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-        var nextLsn = new byte[8];
+        var nextLsn = new byte[10];
         while (await reader.ReadAsync())
         {
             nextLsn = (byte[])reader["next_lsn"];
@@ -61,32 +61,32 @@ public static class CdcDatabase
 
     public static async Task<List<List<Tuple<string, object>>>> GetAllChanges(
         SqlConnection connection,
-        string tableName,
+        string captureInstance,
         long beginLsn,
         long endLsn)
     {
-        return await GetChanges(connection, "cdc.fn_cdc_get_all_changes", tableName, beginLsn, endLsn);
+        return await GetChanges(connection, "cdc.fn_cdc_get_all_changes", captureInstance, beginLsn, endLsn);
     }
 
     public static async Task<List<List<Tuple<string, object>>>> GetNetChanges(
         SqlConnection connection,
-        string tableName,
+        string captureInstance,
         long beginLsn,
         long endLsn)
     {
-        return await GetChanges(connection, "cdc.fn_cdc_get_net_changes", tableName, beginLsn, endLsn);
+        return await GetChanges(connection, "cdc.fn_cdc_get_net_changes", captureInstance, beginLsn, endLsn);
     }
 
     private static async Task<List<List<Tuple<string, object>>>> GetChanges(
         SqlConnection connection,
         string cdcFunction,
-        string tableName,
+        string captureInstance,
         long beginLsn,
         long endLsn)
     {
         var builder = new SqlCommandBuilder();
         // We have to do this here, since we cannot pass the function as command parameter.
-        var function = builder.UnquoteIdentifier($"{cdcFunction}_{tableName}");
+        var function = builder.UnquoteIdentifier($"{cdcFunction}_{captureInstance}");
 
         var sql = $"SELECT * FROM {function}(@begin_lsn, @end_lsn, 'all update old')";
 

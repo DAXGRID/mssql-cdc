@@ -12,9 +12,9 @@ public static class DataConvert
     /// Converts a a colection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
     /// </summary>
     /// <param name="column">List of tuples with Item1 being the name column and Item2 being the column value</param>
-    /// <param name="tableName">The tablename of the column.</param>
+    /// <param name="captureInstance">The tablename of the column.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
-    public static ChangeData<dynamic> ConvertCdcColumn(List<Tuple<string, object>> column, string tableName)
+    public static ChangeData<dynamic> ConvertCdcColumn(List<Tuple<string, object>> column, string captureInstance)
     {
         var startLsn = ConvertBinaryLsn((byte[])column[0].Item2);
         var seqVal = ConvertBinaryLsn((byte[])column[1].Item2);
@@ -30,7 +30,7 @@ public static class DataConvert
             seqVal,
             operation,
             updateMask,
-            tableName,
+            captureInstance,
             body
         );
     }
