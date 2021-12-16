@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using System;
 
 namespace MsSqlCdc;
 
@@ -59,7 +58,7 @@ internal static class CdcDatabase
         return nextLsn;
     }
 
-    public static async Task<List<List<Tuple<string, object>>>> GetAllChanges(
+    public static async Task<List<List<(string fieldName, object fieldValue)>>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
         long beginLsn,
@@ -68,7 +67,7 @@ internal static class CdcDatabase
         return await GetChanges(connection, "cdc.fn_cdc_get_all_changes", captureInstance, beginLsn, endLsn);
     }
 
-    public static async Task<List<List<Tuple<string, object>>>> GetNetChanges(
+    public static async Task<List<List<(string fieldName, object fieldValue)>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         long beginLsn,
@@ -77,7 +76,7 @@ internal static class CdcDatabase
         return await GetChanges(connection, "cdc.fn_cdc_get_net_changes", captureInstance, beginLsn, endLsn);
     }
 
-    private static async Task<List<List<Tuple<string, object>>>> GetChanges(
+    private static async Task<List<List<(string fieldName, object fieldValue)>>> GetChanges(
         SqlConnection connection,
         string cdcFunction,
         string captureInstance,
@@ -94,14 +93,14 @@ internal static class CdcDatabase
         command.Parameters.AddWithValue("@begin_lsn", beginLsn);
         command.Parameters.AddWithValue("@end_lsn", endLsn);
 
-        var changes = new List<List<Tuple<string, object>>>();
+        var changes = new List<List<(string name, object value)>>();
         using SqlDataReader reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var column = new List<Tuple<string, object>>();
+            var column = new List<(string fieldName, object fieldValue)>();
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                column.Add(new Tuple<string, object>(reader.GetName(i), reader.GetValue(i)));
+                column.Add((reader.GetName(i), reader.GetValue(i)));
             }
 
             changes.Add(column);

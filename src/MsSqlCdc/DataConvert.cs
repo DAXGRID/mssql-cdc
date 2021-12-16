@@ -15,19 +15,21 @@ public static class DataConvert
     /// <param name="captureInstance">The tablename of the column.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
     /// <exception cref="Exception"></exception>
-    public static ChangeData<dynamic> ConvertCdcColumn(List<Tuple<string, object>> columnFields, string captureInstance)
+    public static ChangeData<dynamic> ConvertCdcColumn(
+        List<(string fieldName, object fieldValue)> columnFields,
+        string captureInstance)
     {
         if (columnFields.Count < 3)
             throw new Exception($"Count of column fields should be 4 or greater, instead got '{columnFields.Count}'.");
 
-        var startLsn = ConvertBinaryLsn((byte[])columnFields[0].Item2);
-        var seqVal = ConvertBinaryLsn((byte[])columnFields[1].Item2);
-        var operation = ConvertIntOperation((int)columnFields[2].Item2);
-        var updateMask = Encoding.UTF8.GetString((byte[])columnFields[3].Item2);
+        var startLsn = ConvertBinaryLsn((byte[])columnFields[0].fieldValue);
+        var seqVal = ConvertBinaryLsn((byte[])columnFields[1].fieldValue);
+        var operation = ConvertIntOperation((int)columnFields[2].fieldValue);
+        var updateMask = Encoding.UTF8.GetString((byte[])columnFields[3].fieldValue);
 
         var body = columnFields.Skip(4)
             .Aggregate(new ExpandoObject() as IDictionary<string, object>,
-                       (acc, x) => { acc[x.Item1] = x.Item2; return acc; }) as dynamic;
+                       (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
 
         return new ChangeData<dynamic>(
             startLsn,

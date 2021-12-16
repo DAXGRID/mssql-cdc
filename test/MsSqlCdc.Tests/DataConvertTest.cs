@@ -26,15 +26,15 @@ public class DataConverTest
         double salary)
     {
         var captureInstance = "dbo_Employee";
-        var columnFields = new List<Tuple<string, object>>
+        var columnFields = new List<(string name, object value)>
         {
-            new Tuple<string, object>("__$start_lsn", BitConverter.GetBytes(startLsn).Reverse().ToArray()),
-            new Tuple<string, object>("__$seqval", BitConverter.GetBytes(seqVal).Reverse().ToArray()),
-            new Tuple<string, object>("__$operation", (int)operation),
-            new Tuple<string, object>("__$update_mask", Encoding.ASCII.GetBytes(updateMask)),
-            new Tuple<string, object>("Id", id),
-            new Tuple<string, object>("Name", name),
-            new Tuple<string, object>("Salary", salary),
+            ("__$start_lsn", BitConverter.GetBytes(startLsn).Reverse().ToArray()),
+            ("__$seqval", BitConverter.GetBytes(seqVal).Reverse().ToArray()),
+            ("__$operation", (int)operation),
+            ("__$update_mask", Encoding.ASCII.GetBytes(updateMask)),
+            ("Id", id),
+            ("Name", name),
+            ("Salary", salary),
         };
 
         var changeData = new ChangeData<dynamic>(
@@ -75,7 +75,7 @@ public class DataConverTest
         var captureInstance = "dbo_Employee";
 
         var columnFields = Enumerable.Range(0, columnFieldsCount)
-            .Select(x => new Tuple<string, object>(x.ToString(), x)).ToList();
+            .Select(x => (name: x.ToString(), value: (object)x)).ToList();
 
         Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance)).Should().Throw<Exception>();
     }
