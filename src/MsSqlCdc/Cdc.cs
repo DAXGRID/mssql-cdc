@@ -33,14 +33,26 @@ public class Cdc
     }
 
     /// <summary>
-    /// Returns the next log sequence number (LSN) in the sequence based upon the specified LSN.
+    /// Get the previous log sequence number (LSN) in the sequence based upon the specified LSN.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="lsn">The LSN number that should be used as the point to get the previous LSN.</param>
+    /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
+    public static async Task<long> GetPreviousLsn(SqlConnection connection, long lsn)
+    {
+        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, lsn);
+        return DataConvert.ConvertBinaryLsn(previousLsnBytes);
+    }
+
+    /// <summary>
+    /// Get the next log sequence number (LSN) in the sequence based upon the specified LSN.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the next LSN.</param>
-    /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
+    /// <returns>Get the next log sequence number (LSN) in the sequence based upon the specified LSN.</returns>
     public static async Task<long> GetNextLsn(SqlConnection connection, long lsn)
     {
-        var nextLsnBytes = await CdcDatabase.GetNextLsn(connection, lsn);
+        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsn);
         return DataConvert.ConvertBinaryLsn(nextLsnBytes);
     }
 
