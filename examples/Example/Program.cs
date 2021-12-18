@@ -21,7 +21,7 @@ public class Program
         var cdcCancellation = new CancellationTokenSource();
         var cdcCancellationToken = cdcCancellation.Token;
 
-        var myChannel = Channel.CreateUnbounded<IReadOnlyCollection<ChangeData<dynamic>>>();
+        var changeDataChannel = Channel.CreateUnbounded<IReadOnlyCollection<ChangeData<dynamic>>>();
         _ = Task.Factory.StartNew(async () =>
         {
             long lowBoundLsn = await GetStartLsn(connectionString);
@@ -31,7 +31,7 @@ public class Program
                 {
                     // We mark the channel as completed to notify that all consumers should
                     // read the last elements and stop.
-                    myChannel.Writer.Complete();
+                    changeDataChannel.Writer.Complete();
                     break;
                 }
 
@@ -54,7 +54,7 @@ public class Program
                         }
 
                         var orderedChanges = changes.OrderBy(x => x.SequenceValue).ToList();
-                        await myChannel.Writer.WriteAsync(orderedChanges);
+                        await changeDataChannel.Writer.WriteAsync(orderedChanges);
 
                         lowBoundLsn = await Cdc.GetNextLsn(connection, highBoundLsn);
                     }
@@ -87,7 +87,7 @@ public class Program
 
         _ = Task.Factory.StartNew(async () =>
         {
-            await foreach (var changes in myChannel.Reader.ReadAllAsync())
+            await foreach (var changes in changeDataChannel.Reader.ReadAllAsync())
             {
                 var changeDataJson = JsonSerializer.Serialize(changes, options);
                 Console.WriteLine(changeDataJson + "\n");
