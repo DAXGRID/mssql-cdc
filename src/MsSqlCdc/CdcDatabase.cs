@@ -40,7 +40,25 @@ internal static class CdcDatabase
         return maxLsn;
     }
 
-    public static async Task<byte[]> GetNextLsn(SqlConnection connection, long lsn)
+    public static async Task<byte[]> DecrementLsn(SqlConnection connection, long lsn)
+    {
+        var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn) AS previous_lsn";
+
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@lsn", lsn);
+
+        using SqlDataReader reader = await command.ExecuteReaderAsync();
+
+        var nextLsn = new byte[10];
+        while (await reader.ReadAsync())
+        {
+            nextLsn = (byte[])reader["previous_lsn"];
+        }
+
+        return nextLsn;
+    }
+
+    public static async Task<byte[]> IncrementLsn(SqlConnection connection, long lsn)
     {
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn) AS next_lsn";
 
