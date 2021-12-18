@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
@@ -5,8 +6,56 @@ using Microsoft.Data.SqlClient;
 
 namespace MsSqlCdc;
 
+public enum RelationalOperator
+{
+    LargestLessThan,
+    LargestLessThanOrEqual,
+    SmallestGreaterThan,
+    SmallestGreaterThanOrEqual
+}
+
 public class Cdc
 {
+    /// <summary>
+    /// Map the log sequence number (LSN) value from the start_lsn column
+    /// in the cdc.lsn_time_mapping system table for the specified time.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="trackingTime">The datetime value to match against. tracking_time is datetime.</param>
+    /// <param name="relationalOperator">
+    /// Used to identify a distinct LSN value in within the cdc.lsn_time_mapping table with an associated tran_end_time
+    /// that satisfies the relation when compared to the tracking_time value.
+    /// </param>
+    /// <returns>
+    /// Returns the log sequence number (LSN) value from the start_lsn column
+    /// in the cdc.lsn_time_mapping system table for the specified time.
+    /// </returns>
+    public static async Task<long> MapTimeToLsn(
+        SqlConnection connection,
+        DateTime trackingTime,
+        RelationalOperator relationalOperator)
+    {
+        var convertedRelationOperator = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
+        var lsnBytes = await CdcDatabase.MapTimeToLsn(connection, trackingTime, convertedRelationOperator);
+        return DataConvert.ConvertBinaryLsn(lsnBytes);
+    }
+
+    /// <summary>
+    /// Map date and time value from the tran_end_time column in the cdc.lsn_time_mapping
+    /// system table for the specified log sequence number (LSN).
+    /// You can use this function to systematically map LSN ranges to date ranges in a change table.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="lsn">Is the LSN value to match against.</param>
+    /// <returns>
+    /// Returns the date and time value from the tran_end_time column in the cdc.lsn_time_mapping
+    /// system table for the specified log sequence number (LSN).
+    /// </returns>
+    public static async Task<DateTime> MapLsnToTime(SqlConnection connection, long lsn)
+    {
+        return await CdcDatabase.MapLsnToTime(connection, lsn);
+    }
+
     /// <summary>
     /// Get the start_lsn column value for the specified capture instance from the cdc.change_tables system table.
     /// This value represents the low endpoint of the validity interval for the capture instance.

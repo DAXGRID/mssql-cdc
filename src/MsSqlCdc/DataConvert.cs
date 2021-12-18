@@ -73,4 +73,16 @@ internal static class DataConvert
             _ => throw new ArgumentException($"Not valid representation value '{representation}'")
         };
     }
+
+    public static string RelationOperatorToStringRepresentation(RelationalOperator relationalOperator)
+    {
+        return relationalOperator switch
+        {
+            RelationalOperator.LargestLessThan => "largest less than",
+            RelationalOperator.LargestLessThanOrEqual => "largest less than or equal",
+            RelationalOperator.SmallestGreaterThan => "smallest greater than",
+            RelationalOperator.SmallestGreaterThanOrEqual => "smallest greater than or equal",
+            _ => throw new ArgumentException($"Not valid representation value '{relationalOperator}'")
+        };
+    }
 }

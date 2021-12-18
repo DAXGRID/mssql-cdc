@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
@@ -6,6 +7,49 @@ namespace MsSqlCdc;
 
 internal static class CdcDatabase
 {
+    public static async Task<DateTime> MapLsnToTime(SqlConnection connection, long lsn)
+    {
+        var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn) AS lsn_time";
+
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@lsn", lsn);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        DateTime lsnTime = default(DateTime);
+        while (await reader.ReadAsync())
+        {
+            lsnTime = (DateTime)reader["lsn_time"];
+        }
+
+        if (lsnTime == default(DateTime))
+            throw new Exception($"Could not convert LSN to time with LSN being '{lsn}'");
+
+        return lsnTime;
+    }
+
+    public static async Task<byte[]> MapTimeToLsn(
+        SqlConnection connection,
+        DateTime trackingTime,
+        string relationOperator)
+    {
+        var sql = "SELECT sys.fn_cdc_map_time_to_lsn(@relational_operator, @tracking_time) AS lsn";
+
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@relational_operator", relationOperator);
+        command.Parameters.AddWithValue("@tracking_time", trackingTime);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        var lsn = new byte[10];
+        while (await reader.ReadAsync())
+        {
+            lsn = (byte[])reader["lsn"];
+        }
+
+        return lsn;
+    }
+
     public static async Task<byte[]> GetMinLsn(SqlConnection connection, string captureInstance)
     {
         var sql = "SELECT sys.fn_cdc_get_min_lsn(@capture_instance) AS min_lsn";
