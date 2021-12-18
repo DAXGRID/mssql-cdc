@@ -8,12 +8,12 @@ namespace MsSqlCdc;
 public class Cdc
 {
     /// <summary>
-    /// Returns the start_lsn column value for the specified capture instance from the cdc.change_tables system table.
+    /// Get the start_lsn column value for the specified capture instance from the cdc.change_tables system table.
     /// This value represents the low endpoint of the validity interval for the capture instance.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="captureInstance">The name of the capture instance.</param>
-    /// <returns>Returns the CDC column as a ChangeData record.</returns>
+    /// <returns>Return the low endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<long> GetMinLsn(SqlConnection connection, string captureInstance)
     {
         var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance);
@@ -21,7 +21,7 @@ public class Cdc
     }
 
     /// <summary>
-    /// Returns the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table.
+    /// Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table.
     /// You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
@@ -57,7 +57,7 @@ public class Cdc
     }
 
     /// <summary>
-    /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
+    /// Get one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="captureInstance">The name of the capture instance.</param>
@@ -77,7 +77,7 @@ public class Cdc
     }
 
     /// <summary>
-    /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
+    /// Get one row for each change applied to the source table within the specified log sequence number (LSN) range.
     /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
