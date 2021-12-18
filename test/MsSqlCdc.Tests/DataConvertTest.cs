@@ -102,4 +102,15 @@ public class DataConverTest
     {
         Invoking(() => DataConvert.ConvertIntOperation(input)).Should().Throw<ArgumentException>();
     }
+
+    [Theory]
+    [InlineData(RelationalOperator.LargestLessThan, "largest less than")]
+    [InlineData(RelationalOperator.LargestLessThanOrEqual, "largest less than or equal")]
+    [InlineData(RelationalOperator.SmallestGreaterThan, "smallest greater than")]
+    [InlineData(RelationalOperator.SmallestGreaterThanOrEqual, "smallest greater than or equal")]
+    public void RelationOperatorToStringRepresentation(RelationalOperator relationalOperator, string expected)
+    {
+        var stringRepresentation = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
+        stringRepresentation.Should().Be(expected);
+    }
 }
