@@ -9,5 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>MsSqlCdc.Tests</_Parameter1>
+    </AssemblyAttribute>
+</ItemGroup>
 
 </Project>

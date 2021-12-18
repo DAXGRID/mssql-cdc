@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MsSqlCdc;
 
-public static class DataConvert
+internal static class DataConvert
 {
     /// <summary>
     /// Converts a a colection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.

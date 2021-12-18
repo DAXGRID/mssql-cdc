@@ -23,7 +23,6 @@ public record ChangeData<T>
     /// </summary>
     public long SequenceValue { get; init; }
 
-
     /// <summary>
     /// Identifies the data manipulation language (DML) operation needed
     /// to apply the row of change data to the target data source.
