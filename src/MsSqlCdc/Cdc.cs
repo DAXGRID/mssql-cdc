@@ -17,6 +17,27 @@ public enum RelationalOperator
 public class Cdc
 {
     /// <summary>
+    /// Get the column ordinal of the specified column as it appears in the change
+    /// table associated with the specified capture instance.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="captureInstance">
+    /// Is the name of the capture instance in which the specified column is identified as a captured column.
+    /// </param>
+    /// <param name="columnName">Is the column to report on.</param>
+    /// <returns>
+    /// Returns the column ordinal of the specified column as it appears in the change
+    /// table associated with the specified capture instance.
+    /// </returns>
+    public static async Task<int> GetColumnOrdinal(
+        SqlConnection connection,
+        string captureInstance,
+        string columnName)
+    {
+        return await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName);
+    }
+
+    /// <summary>
     /// Map the log sequence number (LSN) value from the start_lsn column
     /// in the cdc.lsn_time_mapping system table for the specified time.
     /// </summary>
