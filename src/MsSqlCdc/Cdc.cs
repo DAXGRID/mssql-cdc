@@ -17,6 +17,29 @@ public enum RelationalOperator
 public class Cdc
 {
     /// <summary>
+    /// Identifies whether the specified update mask indicates that the specified column
+    /// has been updated in the associated change row.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="captureInstance">
+    /// Is the name of the capture instance in which the specified column is identified as a captured column.
+    /// </param>
+    /// <param name="columnName">Is the column to report on.</param>
+    /// <param name="updateMask">Is the mask identifying updated columns in any associated change row.</param>
+    /// <returns>
+    /// Returns whether the specified update mask indicates that the specified column
+    /// has been updated in the associated change row.
+    /// </returns>
+    public static async Task<bool> HasColumnChanged(
+        SqlConnection connection,
+        string captureInstance,
+        string columnName,
+        string updateMask)
+    {
+        return await CdcDatabase.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+    }
+
+    /// <summary>
     /// Get the column ordinal of the specified column as it appears in the change
     /// table associated with the specified capture instance.
     /// </summary>
