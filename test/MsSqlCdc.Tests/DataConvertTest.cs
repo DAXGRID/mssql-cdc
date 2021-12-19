@@ -37,7 +37,7 @@ public class DataConverTest
             ("Salary", salary),
         };
 
-        var changeData = new ChangeData<dynamic>(
+        var changeData = new ChangeRow<dynamic>(
             startLsn,
             seqVal,
             operation,

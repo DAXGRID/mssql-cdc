@@ -10,7 +10,7 @@ public enum Operation
     AfterUpdate = 4
 }
 
-public record ChangeData<T>
+public record ChangeRow<T>
 {
     /// <summary>
     /// Commit LSN associated with the change that preserves the commit order of the change.
@@ -42,11 +42,11 @@ public record ChangeData<T>
     public string CaptureInstance { get; set; }
 
     /// <summary>
-    /// Custom capture instance fields.
+    /// Dynamic column fields.
     /// </summary>
     public T Body { get; init; }
 
-    public ChangeData(
+    public ChangeRow(
         long startLineSequenceNumber,
         long sequenceValue,
         Operation operation,
