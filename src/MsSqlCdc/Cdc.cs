@@ -14,7 +14,7 @@ public enum RelationalOperator
     SmallestGreaterThanOrEqual
 }
 
-public class Cdc
+public static class Cdc
 {
     /// <summary>
     /// Identifies whether the specified update mask indicates that the specified column
