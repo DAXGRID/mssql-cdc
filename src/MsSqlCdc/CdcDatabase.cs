@@ -7,6 +7,30 @@ namespace MsSqlCdc;
 
 internal static class CdcDatabase
 {
+    public static async Task<bool> HasColumnChanged(
+        SqlConnection connection,
+        string captureInstance,
+        string columnName,
+        string updateMask)
+    {
+        var sql = "sys.fn_cdc_has_column_changed(@capture_instance, @column_name, @update_mask) AS has_column_changed";
+
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@capture_instance", captureInstance);
+        command.Parameters.AddWithValue("@column_name", columnName);
+        command.Parameters.AddWithValue("@update_mask", updateMask);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        var hasColumnChanged = false;
+        while (await reader.ReadAsync())
+        {
+            hasColumnChanged = (bool)reader["has_column_changed"];
+        }
+
+        return hasColumnChanged;
+    }
+
     public static async Task<int> GetColumnOrdinal(
         SqlConnection connection,
         string captureInstance,
