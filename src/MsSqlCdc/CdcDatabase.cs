@@ -7,6 +7,28 @@ namespace MsSqlCdc;
 
 internal static class CdcDatabase
 {
+    public static async Task<int> GetColumnOrdinal(
+        SqlConnection connection,
+        string captureInstance,
+        string columnName)
+    {
+        var sql = "SELECT sys.fn_cdc_get_column_ordinal(@capture_instance, @column_name) AS column_ordinal";
+
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@capture_instance", captureInstance);
+        command.Parameters.AddWithValue("@column_name", columnName);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        var columnOrdinal = -1;
+        while (await reader.ReadAsync())
+        {
+            columnOrdinal = (int)reader["column_ordinal"];
+        }
+
+        return columnOrdinal;
+    }
+
     public static async Task<DateTime> MapLsnToTime(SqlConnection connection, long lsn)
     {
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn) AS lsn_time";
