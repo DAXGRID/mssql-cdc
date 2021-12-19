@@ -15,7 +15,7 @@ internal static class DataConvert
     /// <param name="captureInstance">The tablename of the column.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
     /// <exception cref="Exception"></exception>
-    public static ChangeData<dynamic> ConvertCdcColumn(
+    public static ChangeRow<dynamic> ConvertCdcColumn(
         List<(string fieldName, object fieldValue)> columnFields,
         string captureInstance)
     {
@@ -31,7 +31,7 @@ internal static class DataConvert
             .Aggregate(new ExpandoObject() as IDictionary<string, object>,
                        (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
 
-        return new ChangeData<dynamic>(
+        return new ChangeRow<dynamic>(
             startLsn,
             seqVal,
             operation,

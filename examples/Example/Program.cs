@@ -21,7 +21,7 @@ public class Program
         var cdcCancellation = new CancellationTokenSource();
         var cdcCancellationToken = cdcCancellation.Token;
 
-        var changeDataChannel = Channel.CreateUnbounded<IReadOnlyCollection<ChangeData<dynamic>>>();
+        var changeDataChannel = Channel.CreateUnbounded<IReadOnlyCollection<ChangeRow<dynamic>>>();
         _ = Task.Factory.StartNew(async () =>
         {
             long lowBoundLsn = await GetStartLsn(connectionString);
@@ -46,7 +46,7 @@ public class Program
                     {
                         Console.WriteLine($"Polling with from '{lowBoundLsn}' to '{highBoundLsn}");
 
-                        var changes = new List<ChangeData<dynamic>>();
+                        var changes = new List<ChangeRow<dynamic>>();
                         foreach (var table in tables)
                         {
                             var changeSets = await Cdc.GetAllChanges(connection, table, lowBoundLsn, highBoundLsn);
