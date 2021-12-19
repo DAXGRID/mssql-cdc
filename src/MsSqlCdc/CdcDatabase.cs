@@ -38,7 +38,7 @@ internal static class CdcDatabase
 
         using var reader = await command.ExecuteReaderAsync();
 
-        DateTime lsnTime = default(DateTime);
+        var lsnTime = default(DateTime);
         while (await reader.ReadAsync())
         {
             lsnTime = (DateTime)reader["lsn_time"];
@@ -79,7 +79,7 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
 
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
+        using var reader = await command.ExecuteReaderAsync();
 
         var minLsn = new byte[10];
         while (await reader.ReadAsync())
@@ -113,7 +113,7 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
 
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
+        using var reader = await command.ExecuteReaderAsync();
 
         var nextLsn = new byte[10];
         while (await reader.ReadAsync())
@@ -131,7 +131,7 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
 
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
+        using var reader = await command.ExecuteReaderAsync();
 
         var nextLsn = new byte[10];
         while (await reader.ReadAsync())
@@ -178,7 +178,7 @@ internal static class CdcDatabase
         command.Parameters.AddWithValue("@end_lsn", endLsn);
 
         var changes = new List<List<(string name, object value)>>();
-        using SqlDataReader reader = await command.ExecuteReaderAsync();
+        using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             var column = new List<(string fieldName, object fieldValue)>();
