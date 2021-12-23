@@ -9,7 +9,7 @@ internal static class CdcDatabase
 {
     public static async Task<bool?> IsBitSet(SqlConnection connection, int position, string updateMask)
     {
-        var sql = "sys.fn_cdc_is_bit_set(@position, @update_mask ) AS is_bit_set";
+        var sql = "sys.fn_cdc_is_bit_set(@position, @update_mask )";
 
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@position", position);
@@ -80,7 +80,7 @@ internal static class CdcDatabase
 
     public static async Task<byte[]?> GetMaxLsn(SqlConnection connection)
     {
-        var sql = "SELECT sys.fn_cdc_get_max_lsn() AS max_lsn";
+        var sql = "SELECT sys.fn_cdc_get_max_lsn()";
         using var command = new SqlCommand(sql, connection);
 
         return (byte[]?)(await command.ExecuteScalarAsync());
@@ -88,7 +88,7 @@ internal static class CdcDatabase
 
     public static async Task<byte[]?> DecrementLsn(SqlConnection connection, long lsn)
     {
-        var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn) AS previous_lsn";
+        var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
 
@@ -97,7 +97,7 @@ internal static class CdcDatabase
 
     public static async Task<byte[]?> IncrementLsn(SqlConnection connection, long lsn)
     {
-        var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn) AS next_lsn";
+        var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
 
