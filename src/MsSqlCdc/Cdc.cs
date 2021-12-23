@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace MsSqlCdc;
 
@@ -57,7 +58,13 @@ public static class Cdc
         string columnName,
         string updateMask)
     {
-        return await CdcDatabase.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+        var hasColumnChanged = await CdcDatabase.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+        if (!hasColumnChanged.HasValue)
+            throw new Exception(@$"No returned value from 'IsBitSet'
+                                   using values {nameof(captureInstance)}: '{captureInstance}',
+                                   {nameof(columnName)}: '{columnName}',
+                                   {nameof(updateMask)}: '{updateMask}'.");
+        return hasColumnChanged.Value;
     }
 
     /// <summary>
@@ -78,7 +85,12 @@ public static class Cdc
         string captureInstance,
         string columnName)
     {
-        return await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName);
+        var columnOrdinal = await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName);
+        if (!columnOrdinal.HasValue)
+            throw new Exception(@$"Could not get column ordinal on values {nameof(captureInstance)}: '{captureInstance}'
+                                   and {nameof(columnName)}: '{columnName}'.");
+
+        return columnOrdinal.Value;
     }
 
     /// <summary>
@@ -102,6 +114,10 @@ public static class Cdc
     {
         var convertedRelationOperator = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
         var lsnBytes = await CdcDatabase.MapTimeToLsn(connection, trackingTime, convertedRelationOperator);
+        if (lsnBytes is null)
+            throw new Exception(@$"Could not map time to lsn using values {nameof(trackingTime)}: '${trackingTime}'
+                                   and {nameof(relationalOperator)}: '${convertedRelationOperator}.
+                                   Response was empty.");
         return DataConvert.ConvertBinaryLsn(lsnBytes);
     }
 
@@ -118,7 +134,11 @@ public static class Cdc
     /// </returns>
     public static async Task<DateTime> MapLsnToTime(SqlConnection connection, long lsn)
     {
-        return await CdcDatabase.MapLsnToTime(connection, lsn);
+        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, lsn);
+        if (!lsnToTime.HasValue)
+            throw new Exception($"Could not convert LSN to time with LSN being '{lsn}'");
+
+        return lsnToTime.Value;
     }
 
     /// <summary>
@@ -131,18 +151,25 @@ public static class Cdc
     public static async Task<long> GetMinLsn(SqlConnection connection, string captureInstance)
     {
         var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance);
+        if (minLsnBytes is null)
+            throw new Exception(@$"Could get min LSN using values {nameof(captureInstance)}: '${captureInstance}'");
+
         return DataConvert.ConvertBinaryLsn(minLsnBytes);
     }
 
     /// <summary>
     /// Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table.
-    /// You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
+    /// You can use this function to return the high endpoint of the change
+    /// data capture timeline for any capture instance.
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<long> GetMaxLsn(SqlConnection connection)
     {
         var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection);
+        if (maxLsnBytes is null)
+            throw new Exception($"Could not get max LSN.");
+
         return DataConvert.ConvertBinaryLsn(maxLsnBytes);
     }
 
@@ -155,6 +182,9 @@ public static class Cdc
     public static async Task<long> GetPreviousLsn(SqlConnection connection, long lsn)
     {
         var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, lsn);
+        if (previousLsnBytes is null)
+            throw new Exception($"Could not get previous lsn on {nameof(lsn)}: '{lsn}'.");
+
         return DataConvert.ConvertBinaryLsn(previousLsnBytes);
     }
 
@@ -167,6 +197,9 @@ public static class Cdc
     public static async Task<long> GetNextLsn(SqlConnection connection, long lsn)
     {
         var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsn);
+        if (nextLsnBytes is null)
+            throw new Exception($"Could not get next lsn on {nameof(lsn)}: '{lsn}'.");
+
         return DataConvert.ConvertBinaryLsn(nextLsnBytes);
     }
 
