@@ -17,6 +17,27 @@ public enum RelationalOperator
 public static class Cdc
 {
     /// <summary>
+    /// Indicates whether a captured column has been updated by checking whether
+    /// its ordinal position is set within a provided bitmask.
+    /// </summary>
+    /// <param name="connection">An open connection to a MS-SQL database.</param>
+    /// <param name="Position"> Is the ordinal position in the mask to check. position is int.</param>
+    /// <param name="updateMask">Is the mask identifying updated columns.</param>
+    /// <returns>
+    /// Returns whether a captured column has been updated by checking whether
+    /// its ordinal position is set within a provided bitmask.
+    /// </returns>
+    public static async Task<bool> IsBitSet(SqlConnection connection, int position, string updateMask)
+    {
+        var isBitSet = await CdcDatabase.IsBitSet(connection, position, updateMask);
+        if (!isBitSet.HasValue)
+            throw new Exception(@$"No returned value from 'IsBitSet'
+                                   using values {nameof(position)}: '{position}'
+                                   and {nameof(updateMask)}: '{updateMask}'.");
+        return isBitSet.Value;
+    }
+
+    /// <summary>
     /// Identifies whether the specified update mask indicates that the specified column
     /// has been updated in the associated change row.
     /// </summary>
