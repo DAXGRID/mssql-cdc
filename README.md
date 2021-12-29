@@ -14,7 +14,7 @@ Usage examples can be found under the [example folder](https://github.com/DAXGRI
 
 ## API
 
-### GetIsBitSet
+### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
 
@@ -28,7 +28,7 @@ var isBitSet = await Cdc.IsBitSet(connection, columnOrdinal, "my_update_mask");
 
 ### Has column changed
 
-Identifies whether the specified update mask indicates that the specified colum has been updated in the associated change row.
+Identifies whether the update mask on the specified column has been updated in the associated change row.
 
 ```c#
 var connectionString = GetConnectionString();
