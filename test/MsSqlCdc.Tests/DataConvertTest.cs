@@ -113,4 +113,27 @@ public class DataConverTest
         var stringRepresentation = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
         stringRepresentation.Should().Be(expected);
     }
+
+    [Theory]
+    [InlineData(NetChangesRowFilterOption.All, "all")]
+    [InlineData(NetChangesRowFilterOption.AllWithMask, "all with mask")]
+    [InlineData(NetChangesRowFilterOption.AllWithMerge, "all with merge")]
+    public void NetChangesRowFilterOptionToStringRepresentation(
+        NetChangesRowFilterOption filterOption,
+        string expected)
+    {
+        var stringRepresentation = DataConvert.NetChangesRowFilterOptionToStringRepresentation(filterOption);
+        stringRepresentation.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(AllChangesRowFilterOption.All, "all")]
+    [InlineData(AllChangesRowFilterOption.AllUpdateOld, "all update old")]
+    public void AllChangesRowFilterOptionToStringRepresentation(
+        AllChangesRowFilterOption filterOption,
+        string expected)
+    {
+        var stringRepresentation = DataConvert.AllChangesRowFilterOptionToStringRepresentation(filterOption);
+        stringRepresentation.Should().Be(expected);
+    }
 }

@@ -68,6 +68,12 @@ internal static class DataConvert
             _ => throw new ArgumentException($"Not valid representation value '{representation}'")
         };
 
+    /// <summary>
+    /// Converts the RelationOperator enum to a string representation to be used in MS-SQL.
+    /// </summary>
+    /// <param name="representation">The enum representation of RelationOperator.</param>
+    /// <returns>String representation of RelationOperator.</returns>
+    /// <exception cref="ArgumentException"></exception>
     public static string RelationOperatorToStringRepresentation(RelationalOperator relationalOperator)
         => relationalOperator switch
         {
@@ -76,5 +82,34 @@ internal static class DataConvert
             RelationalOperator.SmallestGreaterThan => "smallest greater than",
             RelationalOperator.SmallestGreaterThanOrEqual => "smallest greater than or equal",
             _ => throw new ArgumentException($"Not valid representation value '{relationalOperator}'")
+        };
+
+    /// <summary>
+    /// Converts the NetChangesRowFilterOption enum to a string representation to be used in MS-SQL.
+    /// </summary>
+    /// <param name="representation">The enum representation of NetChangesRowFilterOption.</param>
+    /// <returns>String representation of NetChangesRowfilterOption.</returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static string NetChangesRowFilterOptionToStringRepresentation(
+        NetChangesRowFilterOption netChangesRowFilterOption) => netChangesRowFilterOption switch
+        {
+            NetChangesRowFilterOption.All => "all",
+            NetChangesRowFilterOption.AllWithMask => "all with mask",
+            NetChangesRowFilterOption.AllWithMerge => "all with merge",
+            _ => throw new ArgumentException($"Not valid representation value '{netChangesRowFilterOption}'")
+        };
+
+    /// <summary>
+    /// Converts the AllChangesRowFilterOption enum to a string representation to be used in MS-SQL.
+    /// </summary>
+    /// <param name="representation">The enum representation of AllChangesRowFilterOption.</param>
+    /// <returns>String representation of AllChangesRowFilterOption.</returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static string AllChangesRowFilterOptionToStringRepresentation(
+        AllChangesRowFilterOption allChangesRowFilterOption) => allChangesRowFilterOption switch
+        {
+            AllChangesRowFilterOption.All => "all",
+            AllChangesRowFilterOption.AllUpdateOld => "all update old",
+            _ => throw new ArgumentException($"Not valid representation value '{allChangesRowFilterOption}'")
         };
 }
