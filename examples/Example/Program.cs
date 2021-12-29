@@ -49,7 +49,8 @@ public class Program
                         var changes = new List<ChangeRow<dynamic>>();
                         foreach (var table in tables)
                         {
-                            var changeSets = await Cdc.GetAllChanges(connection, table, lowBoundLsn, highBoundLsn);
+                            var changeSets = await Cdc.GetAllChanges(
+                                connection, table, lowBoundLsn, highBoundLsn, AllChangesRowFilterOption.AllUpdateOld);
                             changes.AddRange(changeSets);
                         }
 

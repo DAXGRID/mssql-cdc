@@ -108,18 +108,32 @@ internal static class CdcDatabase
         SqlConnection connection,
         string captureInstance,
         long beginLsn,
-        long endLsn)
+        long endLsn,
+        string filterOption)
     {
-        return await GetChanges(connection, "cdc.fn_cdc_get_all_changes", captureInstance, beginLsn, endLsn);
+        return await GetChanges(
+            connection,
+            "cdc.fn_cdc_get_all_changes",
+            captureInstance,
+            beginLsn,
+            endLsn,
+            filterOption);
     }
 
     public static async Task<List<List<(string fieldName, object fieldValue)>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         long beginLsn,
-        long endLsn)
+        long endLsn,
+        string filterOption)
     {
-        return await GetChanges(connection, "cdc.fn_cdc_get_net_changes", captureInstance, beginLsn, endLsn);
+        return await GetChanges(
+            connection,
+            "cdc.fn_cdc_get_net_changes",
+            captureInstance,
+            beginLsn,
+            endLsn,
+            filterOption);
     }
 
     private static async Task<List<List<(string fieldName, object fieldValue)>>> GetChanges(
@@ -127,17 +141,19 @@ internal static class CdcDatabase
         string cdcFunction,
         string captureInstance,
         long beginLsn,
-        long endLsn)
+        long endLsn,
+        string filterOption)
     {
         var builder = new SqlCommandBuilder();
         // We have to do this here, since we cannot pass the function as command parameter.
         var function = builder.UnquoteIdentifier($"{cdcFunction}_{captureInstance}");
 
-        var sql = $"SELECT * FROM {function}(@begin_lsn, @end_lsn, 'all update old')";
+        var sql = $"SELECT * FROM {function}(@begin_lsn, @end_lsn, @filter_option)";
 
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@begin_lsn", beginLsn);
         command.Parameters.AddWithValue("@end_lsn", endLsn);
+        command.Parameters.AddWithValue("@filter_option", filterOption);
 
         var changes = new List<List<(string name, object value)>>();
         using var reader = await command.ExecuteReaderAsync();

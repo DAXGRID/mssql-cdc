@@ -7,12 +7,62 @@ using System.Data;
 
 namespace MsSqlCdc;
 
+/// <summary>
+/// Is used to identify a distinct LSN value in within the cdc.lsn_time_mapping table
+/// with an associated tran_end_time that satisfies the relation when compared to the tracking_time value.
+/// </summary>
 public enum RelationalOperator
 {
     LargestLessThan,
     LargestLessThanOrEqual,
     SmallestGreaterThan,
     SmallestGreaterThanOrEqual
+}
+
+/// <summary>
+/// An option that governs the content of the metadata columns as well as the rows returned in the result set.
+/// </summary>
+public enum NetChangesRowFilterOption
+{
+    /// <summary>
+    /// Returns the LSN of the final change to the row and the operation needed
+    /// to apply the row in the metadata columns __$start_lsn and __$operation.
+    /// The column __$update_mask is always NULL.
+    /// </summary>
+    All,
+    /// <summary>
+    /// Returns the LSN of the final change to the row and the operation
+    /// needed to apply the row in the metadata columns __$start_lsn and __$operation.
+    /// In addition, when an update operation returns (__$operation = 4)
+    /// the captured columns modified in the update are marked in the value returned in __$update_mask.
+    /// </summary>
+    AllWithMask,
+    /// <summary>
+    /// Returns the LSN of the final change to the row in the metadata columns __$start_lsn.
+    /// The column __$operation will be one of two values: 1 for delete and 5 to indicate
+    /// that the operation needed to apply the change is either an insert or an update.
+    /// The column __$update_mask is always NULL.
+    /// </summary>
+    AllWithMerge,
+}
+
+/// <summary>
+/// An option that governs the content of the metadata columns as well as the rows returned in the result set.
+/// </summary>
+public enum AllChangesRowFilterOption
+{
+    /// <summary>
+    /// Returns all changes within the specified LSN range.
+    /// For changes due to an update operation, this option only returns
+    /// the row containing the new values after the update is applied.
+    /// </summary>
+    All,
+    /// <summary>
+    /// Returns all changes within the specified LSN range.
+    /// For changes due to an update operation, this option returns both the row containing
+    /// the column values before the update and the row containing the column values after the update.
+    /// </summary>
+    AllUpdateOld
 }
 
 public static class Cdc
@@ -217,9 +267,12 @@ public static class Cdc
         SqlConnection connection,
         string captureInstance,
         long fromLsn,
-        long toLsn)
+        long toLsn,
+        NetChangesRowFilterOption netChangesRowFilterOption = NetChangesRowFilterOption.All)
     {
-        var cdcColumns = await CdcDatabase.GetNetChanges(connection, captureInstance, fromLsn, toLsn);
+        var filterOption = DataConvert.NetChangesRowFilterOptionToStringRepresentation(netChangesRowFilterOption);
+        var cdcColumns = await CdcDatabase.GetNetChanges(
+            connection, captureInstance, fromLsn, toLsn, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
 
@@ -239,9 +292,11 @@ public static class Cdc
         SqlConnection connection,
         string captureInstance,
         long beginLsn,
-        long endLsn)
+        long endLsn,
+        AllChangesRowFilterOption allChangesRowFilterOption = AllChangesRowFilterOption.All)
     {
-        var cdcColumns = await CdcDatabase.GetAllChanges(connection, captureInstance, beginLsn, endLsn);
+        var filterOption = DataConvert.AllChangesRowFilterOptionToStringRepresentation(allChangesRowFilterOption);
+        var cdcColumns = await CdcDatabase.GetAllChanges(connection, captureInstance, beginLsn, endLsn, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
 }
