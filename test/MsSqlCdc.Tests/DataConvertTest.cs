@@ -55,9 +55,9 @@ public class DataConverTest
 
         using (var scope = new AssertionScope())
         {
-            Assert.True(result.Body.Id == changeData.Body.Id);
-            Assert.True(result.Body.Name == changeData.Body.Name);
-            Assert.True(result.Body.Salary == changeData.Body.Salary);
+            ((int)result.Body.Id).Should().Be(changeData.Body.Id);
+            ((string)result.Body.Name).Should().Be(changeData.Body.Name);
+            ((double)result.Body.Salary).Should().Be(changeData.Body.Salary);
             result.StartLineSequenceNumber.Should().Be(changeData.StartLineSequenceNumber);
             result.SequenceValue.Should().Be(changeData.SequenceValue);
             result.Operation.Should().Be(changeData.Operation);
