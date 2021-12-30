@@ -19,8 +19,7 @@ Usage examples can be found under the [example folder](https://github.com/DAXGRI
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
 var isBitSet = await Cdc.IsBitSet(connection, columnOrdinal, "my_update_mask");
@@ -31,8 +30,7 @@ var isBitSet = await Cdc.IsBitSet(connection, columnOrdinal, "my_update_mask");
 Identifies whether the specified update mask indicates that the specified colum has been updated in the associated change row.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 await Cdc.HasColumnChanged(connection, "dbo_Employee", "Salary", "my_update_mask");
 ```
@@ -42,8 +40,7 @@ await Cdc.HasColumnChanged(connection, "dbo_Employee", "Salary", "my_update_mask
 Get the column ordinal of the specified column as it appears in the change table associated with the specified capture instance.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
 ```
@@ -53,8 +50,7 @@ var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Sala
 Map the log sequence number (LSN) value from the start_lsn column in the cdc.lsn_time_mapping system table for the specified time.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var lsn = await Cdc.MapTimeToLsn(connection, DateTime.UtcNow, RelationalOperator.LargestLessThan);
 ```
@@ -64,8 +60,7 @@ var lsn = await Cdc.MapTimeToLsn(connection, DateTime.UtcNow, RelationalOperator
 Map date and time value from the tran_end_time column in the cdc.lsn_time_mapping system table for the specified log sequence number (LSN). You can use this function to systematically map LSN ranges to date ranges in a change table.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var time = await Cdc.MapLsnToTime(connection, 120000);
 ```
@@ -75,8 +70,7 @@ var time = await Cdc.MapLsnToTime(connection, 120000);
 Get the start_lsn column value for the specified capture instance from the cdc.change_tables system table. This value represents the low endpoint of the validity interval for the capture instance.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var minLsn = await Cdc.GetMinLsn(connection, "dbo_Employee");
 ```
@@ -86,8 +80,7 @@ var minLsn = await Cdc.GetMinLsn(connection, "dbo_Employee");
 Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table. You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var maxLsn = await Cdc.GetMaxLsn(connection);
 ```
@@ -97,8 +90,7 @@ var maxLsn = await Cdc.GetMaxLsn(connection);
 Get the previous log sequence number (LSN) in the sequence based upon the specified LSN.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var previousLsn = await Cdc.GetPreviousLsn(connection, 120000);
 ```
@@ -108,8 +100,7 @@ var previousLsn = await Cdc.GetPreviousLsn(connection, 120000);
 Get the next log sequence number (LSN) in the sequence based upon the specified LSN.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var nextLsn = await Cdc.GetNextLsn(connection, 120000);
 ```
@@ -119,8 +110,7 @@ var nextLsn = await Cdc.GetNextLsn(connection, 120000);
 Get one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120020);
 ```
@@ -130,8 +120,7 @@ var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120
 Get one row for each change applied to the source table within the specified log sequence number (LSN) range. If a source row had multiple changes during the interval, each change is represented in the returned result set.
 
 ```c#
-var connectionString = GetConnectionString();
-var connection = new SqlConnection(connectionString);
+using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var allChanges = await Cdc.GetAllChanges(connection, "dbo_Employee", 120000, 120020);
 ```
