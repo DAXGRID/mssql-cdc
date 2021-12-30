@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using FluentAssertions.Execution;
+using System.Text.Json;
 
 namespace MsSqlCdc.Tests;
 
@@ -53,16 +53,8 @@ public class DataConverTest
 
         var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
 
-        using (var scope = new AssertionScope())
-        {
-            ((int)result.Body.Id).Should().Be(changeData.Body.Id);
-            ((string)result.Body.Name).Should().Be(changeData.Body.Name);
-            ((double)result.Body.Salary).Should().Be(changeData.Body.Salary);
-            result.StartLineSequenceNumber.Should().Be(changeData.StartLineSequenceNumber);
-            result.SequenceValue.Should().Be(changeData.SequenceValue);
-            result.Operation.Should().Be(changeData.Operation);
-            result.UpdateMask.Should().Be(changeData.UpdateMask);
-        }
+        // We do this since record type equality operator does not work with dynamic members.
+        JsonSerializer.Serialize(result).Should().Be(JsonSerializer.Serialize(changeData));
     }
 
     [Theory]
