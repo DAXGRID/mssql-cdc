@@ -6,49 +6,96 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Text.Json;
+using System.Dynamic;
 
 namespace MsSqlCdc.Tests;
 
 public class DataConverTest
 {
-    [Theory]
-    [InlineData(25000L, 25002L, Operation.AfterUpdate, "ABB", 10, "Rune", 20000.00)]
-    [InlineData(25L, 25202L, Operation.BeforeUpdate, "DSDFS", 2, "Simon", 0.00)]
-    [InlineData(250000000L, 250021L, Operation.Delete, "DFS", 3, "Foo", 1000000000.00)]
-    [InlineData(0L, 2L, Operation.Insert, "DFS", 3, "John", 1000000000.00)]
-    public void ConvertCdcColumn_ShouldReturnChangeData_OnValidInput(
-        long startLsn,
-        long seqVal,
-        Operation operation,
-        string updateMask,
-        int id,
-        string name,
-        double salary)
+    public static IEnumerable<object[]> CdcColumnFieldsData()
     {
-        var captureInstance = "dbo_Employee";
-        var columnFields = new List<(string name, object value)>
+        yield return new object[]
         {
-            ("__$start_lsn", BitConverter.GetBytes(startLsn).Reverse().ToArray()),
-            ("__$seqval", BitConverter.GetBytes(seqVal).Reverse().ToArray()),
-            ("__$operation", (int)operation),
-            ("__$update_mask", Encoding.ASCII.GetBytes(updateMask)),
-            ("Id", id),
-            ("Name", name),
-            ("Salary", salary),
+            new List<(string name, object fieldValue)>
+            {
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.AfterUpdate),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("Id", 10),
+                ("Name", "Rune"),
+                ("Salary", 20000.00),
+            },
         };
 
-        var changeData = new ChangeRow<dynamic>(
-            startLsn,
-            seqVal,
-            operation,
-            updateMask,
-            "dbo_Employee",
-            new
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
             {
-                Id = id,
-                Name = name,
-                Salary = salary,
-            }
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.BeforeUpdate),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("Id", 1),
+                ("Name", "Simon"),
+            },
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.Delete),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("Id", 10),
+                ("Name", "Jesper"),
+            },
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.Insert),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("Id", 10),
+            },
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.Insert),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+            },
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(CdcColumnFieldsData))]
+    public void ConvertCdcColumn_ShouldReturnChangeData_OnValidInput(
+        List<(string name, object fieldValue)> columnFields)
+    {
+        var captureInstance = "dbo_Employee";
+
+        var body = columnFields.Skip(4)
+            .Aggregate(new ExpandoObject() as IDictionary<string, object>,
+                       (acc, x) => { acc[x.name] = x.fieldValue; return acc; }) as dynamic;
+
+        var changeData = new ChangeRow<dynamic>(
+            BitConverter.ToInt64(((byte[])columnFields[0].fieldValue).Reverse().ToArray()),
+            BitConverter.ToInt64(((byte[])columnFields[1].fieldValue).Reverse().ToArray()),
+            (Operation)columnFields[2].fieldValue,
+            Encoding.UTF8.GetString((byte[])columnFields[3].fieldValue),
+            captureInstance,
+            body
         );
 
         var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
