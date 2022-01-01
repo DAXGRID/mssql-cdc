@@ -74,7 +74,7 @@ internal static class DataConvert
     /// <param name="representation">The enum representation of RelationOperator.</param>
     /// <returns>String representation of RelationOperator.</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static string RelationOperatorToStringRepresentation(RelationalOperator relationalOperator)
+    public static string ConvertRelationOperator(RelationalOperator relationalOperator)
         => relationalOperator switch
         {
             RelationalOperator.LargestLessThan => "largest less than",
@@ -90,7 +90,7 @@ internal static class DataConvert
     /// <param name="representation">The enum representation of NetChangesRowFilterOption.</param>
     /// <returns>String representation of NetChangesRowfilterOption.</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static string NetChangesRowFilterOptionToStringRepresentation(
+    public static string ConvertNetChangesRowFilterOption(
         NetChangesRowFilterOption netChangesRowFilterOption) => netChangesRowFilterOption switch
         {
             NetChangesRowFilterOption.All => "all",
@@ -105,7 +105,7 @@ internal static class DataConvert
     /// <param name="representation">The enum representation of AllChangesRowFilterOption.</param>
     /// <returns>String representation of AllChangesRowFilterOption.</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static string AllChangesRowFilterOptionToStringRepresentation(
+    public static string ConvertAllChangesRowFilterOption(
         AllChangesRowFilterOption allChangesRowFilterOption) => allChangesRowFilterOption switch
         {
             AllChangesRowFilterOption.All => "all",

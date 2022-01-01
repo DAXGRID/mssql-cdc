@@ -80,7 +80,7 @@ public class DataConverTest
 
     [Theory]
     [MemberData(nameof(CdcColumnFieldsData))]
-    public void ConvertCdcColumn_ShouldReturnChangeData_OnValidInput(
+    public void Conversion_cdc_column_to_change_row(
         List<(string name, object fieldValue)> columnFields)
     {
         var captureInstance = "dbo_Employee";
@@ -109,7 +109,7 @@ public class DataConverTest
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
-    public void ConvertCdcColumn_ShouldThrowException_OnColumnFieldsBeingLessThanFour(int columnFieldsCount)
+    public void Conversion_cdc_column_invalid_when_column_fields_count_less_than_four(int columnFieldsCount)
     {
         var captureInstance = "dbo_Employee";
 
@@ -124,7 +124,7 @@ public class DataConverTest
     [InlineData(2, Operation.Insert)]
     [InlineData(3, Operation.BeforeUpdate)]
     [InlineData(4, Operation.AfterUpdate)]
-    public void ConvertIntOperation_ShouldReturnCorrectEnumConvertion(int input, Operation expected)
+    public void Operation_valid_number_representation_should_be_converted(int input, Operation expected)
     {
         var operation = DataConvert.ConvertIntOperation(input);
         operation.Should().Be(expected);
@@ -137,7 +137,7 @@ public class DataConverTest
     [InlineData(100)]
     [InlineData(int.MinValue)]
     [InlineData(int.MaxValue)]
-    public void ConvertIntOperation_ShouldThrowException_OnInvalidIntRepresentation(int input)
+    public void Operation_invalid_number_representation_should_not_be_converted(int input)
     {
         Invoking(() => DataConvert.ConvertIntOperation(input)).Should().Throw<ArgumentException>();
     }
@@ -147,9 +147,11 @@ public class DataConverTest
     [InlineData(RelationalOperator.LargestLessThanOrEqual, "largest less than or equal")]
     [InlineData(RelationalOperator.SmallestGreaterThan, "smallest greater than")]
     [InlineData(RelationalOperator.SmallestGreaterThanOrEqual, "smallest greater than or equal")]
-    public void RelationOperatorToStringRepresentation(RelationalOperator relationalOperator, string expected)
+    public void Convert_relation_operator_to_string_representation(
+        RelationalOperator relationalOperator,
+        string expected)
     {
-        var stringRepresentation = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
+        var stringRepresentation = DataConvert.ConvertRelationOperator(relationalOperator);
         stringRepresentation.Should().Be(expected);
     }
 
@@ -157,22 +159,22 @@ public class DataConverTest
     [InlineData(NetChangesRowFilterOption.All, "all")]
     [InlineData(NetChangesRowFilterOption.AllWithMask, "all with mask")]
     [InlineData(NetChangesRowFilterOption.AllWithMerge, "all with merge")]
-    public void NetChangesRowFilterOptionToStringRepresentation(
+    public void Convert_net_changes_filter_options_to_string_representation(
         NetChangesRowFilterOption filterOption,
         string expected)
     {
-        var stringRepresentation = DataConvert.NetChangesRowFilterOptionToStringRepresentation(filterOption);
+        var stringRepresentation = DataConvert.ConvertNetChangesRowFilterOption(filterOption);
         stringRepresentation.Should().Be(expected);
     }
 
     [Theory]
     [InlineData(AllChangesRowFilterOption.All, "all")]
     [InlineData(AllChangesRowFilterOption.AllUpdateOld, "all update old")]
-    public void AllChangesRowFilterOptionToStringRepresentation(
+    public void Convert_all_changes_filter_options_to_string_representation(
         AllChangesRowFilterOption filterOption,
         string expected)
     {
-        var stringRepresentation = DataConvert.AllChangesRowFilterOptionToStringRepresentation(filterOption);
+        var stringRepresentation = DataConvert.ConvertAllChangesRowFilterOption(filterOption);
         stringRepresentation.Should().Be(expected);
     }
 }

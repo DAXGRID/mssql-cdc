@@ -162,7 +162,7 @@ public static class Cdc
         DateTime trackingTime,
         RelationalOperator relationalOperator)
     {
-        var convertedRelationOperator = DataConvert.RelationOperatorToStringRepresentation(relationalOperator);
+        var convertedRelationOperator = DataConvert.ConvertRelationOperator(relationalOperator);
         var lsnBytes = await CdcDatabase.MapTimeToLsn(connection, trackingTime, convertedRelationOperator);
         if (lsnBytes is null)
             throw new Exception(@$"Could not map time to lsn using values {nameof(trackingTime)}: '${trackingTime}'
@@ -270,7 +270,7 @@ public static class Cdc
         long toLsn,
         NetChangesRowFilterOption netChangesRowFilterOption = NetChangesRowFilterOption.All)
     {
-        var filterOption = DataConvert.NetChangesRowFilterOptionToStringRepresentation(netChangesRowFilterOption);
+        var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
             connection, captureInstance, fromLsn, toLsn, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
@@ -295,7 +295,7 @@ public static class Cdc
         long endLsn,
         AllChangesRowFilterOption allChangesRowFilterOption = AllChangesRowFilterOption.All)
     {
-        var filterOption = DataConvert.AllChangesRowFilterOptionToStringRepresentation(allChangesRowFilterOption);
+        var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetAllChanges(connection, captureInstance, beginLsn, endLsn, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
