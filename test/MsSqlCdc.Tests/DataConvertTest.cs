@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Text.Json;
-using System.Dynamic;
 
 namespace MsSqlCdc.Tests;
 
@@ -26,6 +25,18 @@ public class DataConverTest
                 ("Name", "Rune"),
                 ("Salary", 20000.00),
             },
+            "dbo_Employee",
+            new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.AfterUpdate,
+                "MASK",
+                "dbo_Employee",
+                new {
+                    Id = 10,
+                    Name = "Rune",
+                    Salary = 20000.00
+                })
         };
 
         yield return new object[]
@@ -39,6 +50,17 @@ public class DataConverTest
                 ("Id", 1),
                 ("Name", "Simon"),
             },
+            "dbo_Employee",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.BeforeUpdate,
+                "MASK",
+                "dbo_Employee",
+                new {
+                    Id = 1,
+                    Name = "Simon",
+                })
         };
 
         yield return new object[]
@@ -49,9 +71,20 @@ public class DataConverTest
                 ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
                 ("__$operation", (int)Operation.Delete),
                 ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("Id", 10),
+                ("Id", 0),
                 ("Name", "Jesper"),
             },
+            "dbo_Employee",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Delete,
+                "MASK",
+                "dbo_Employee",
+                new {
+                    Id = 0,
+                    Name = "Jesper",
+                })
         };
 
         yield return new object[]
@@ -64,6 +97,16 @@ public class DataConverTest
                 ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
                 ("Id", 10),
             },
+            "dbo_Animal",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Insert,
+                "MASK",
+                "dbo_Animal",
+                new {
+                    Id = 10,
+                })
         };
 
         yield return new object[]
@@ -75,33 +118,29 @@ public class DataConverTest
                 ("__$operation", (int)Operation.Insert),
                 ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
             },
+            "dbo_Animal",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Insert,
+                "MASK",
+                "dbo_Animal",
+                new {
+                })
         };
     }
 
     [Theory]
     [MemberData(nameof(CdcColumnFieldsData))]
     public void Conversion_cdc_column_to_change_row(
-        List<(string name, object fieldValue)> columnFields)
+        List<(string name, object fieldValue)> columnFields,
+        string captureInstance,
+        ChangeRow<dynamic> expected)
     {
-        var captureInstance = "dbo_Employee";
-
-        var body = columnFields.Skip(4)
-            .Aggregate(new ExpandoObject() as IDictionary<string, object>,
-                       (acc, x) => { acc[x.name] = x.fieldValue; return acc; }) as dynamic;
-
-        var changeData = new ChangeRow<dynamic>(
-            BitConverter.ToInt64(((byte[])columnFields[0].fieldValue).Reverse().ToArray()),
-            BitConverter.ToInt64(((byte[])columnFields[1].fieldValue).Reverse().ToArray()),
-            (Operation)columnFields[2].fieldValue,
-            Encoding.UTF8.GetString((byte[])columnFields[3].fieldValue),
-            captureInstance,
-            body
-        );
-
         var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
 
         // We do this since record type equality operator does not work with dynamic members.
-        JsonSerializer.Serialize(result).Should().Be(JsonSerializer.Serialize(changeData));
+        JsonSerializer.Serialize(result).Should().Be(JsonSerializer.Serialize(expected));
     }
 
     [Theory]
