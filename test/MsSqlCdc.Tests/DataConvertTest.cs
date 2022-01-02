@@ -194,8 +194,7 @@ public class DataConverTest
         };
     }
 
-
-    public static IEnumerable<object[]> InvalidCdcColumnFieldsData()
+    public static IEnumerable<object[]> CdcDefaultFieldsInvalidData()
     {
         yield return new object[]
         {
@@ -232,8 +231,32 @@ public class DataConverTest
             },
             "dbo_Employee",
         };
-    }
 
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("Id", 0),
+                ("Name", "Rune")
+            },
+            "dbo_Employee",
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("Address", "Streetvalley 20"),
+                ("Salary", 2000.00),
+                ("Id", 0),
+                ("Name", "Rune")
+            },
+            "dbo_Employee",
+        };
+    }
 
     [Theory]
     [MemberData(nameof(CdcColumnFieldsData))]
@@ -249,13 +272,15 @@ public class DataConverTest
     }
 
     [Theory]
-    [MemberData(nameof(InvalidCdcColumnFieldsData))]
-    public void Conversion_cdc_column_invalid_when_column_fields_count_less_than_four(
+    [MemberData(nameof(CdcDefaultFieldsInvalidData))]
+    public void Conversion_cdc_column_without_default_fields_is_invalid(
         List<(string name, object fieldValue)> columnFields,
         string captureInstance)
     {
-
-        Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance)).Should().Throw<Exception>();
+        Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance))
+            .Should()
+            .Throw<ArgumentException>()
+            .WithMessage($"The column fields does not contain all the default CDC column fields.");
     }
 
     [Theory]
