@@ -22,12 +22,23 @@ internal static class DataConvert
         if (columnFields.Count < 3)
             throw new Exception($"Count of column fields should be 4 or greater, instead got '{columnFields.Count}'.");
 
-        var startLsn = ConvertBinaryLsn((byte[])columnFields[0].fieldValue);
-        var seqVal = ConvertBinaryLsn((byte[])columnFields[1].fieldValue);
-        var operation = ConvertIntOperation((int)columnFields[2].fieldValue);
-        var updateMask = Encoding.UTF8.GetString((byte[])columnFields[3].fieldValue);
+        var startLsn = ConvertBinaryLsn(
+            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.StartLsn).fieldValue);
+        var seqVal = ConvertBinaryLsn(
+            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.SeqVal).fieldValue);
+        var operation = ConvertIntOperation(
+            (int)columnFields.First(x => x.fieldName == CdcFieldName.Operation).fieldValue);
+        var updateMask = Encoding.UTF8.GetString(
+            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.UpdateMask).fieldValue);
 
-        var body = columnFields.Skip(4)
+        bool isDefaultField(string fieldName) =>
+            fieldName == CdcFieldName.StartLsn ||
+            fieldName == CdcFieldName.SeqVal ||
+            fieldName == CdcFieldName.Operation ||
+            fieldName == CdcFieldName.UpdateMask;
+
+        var body = columnFields
+            .Where(x => !isDefaultField(x.fieldName))
             .Aggregate(new ExpandoObject() as IDictionary<string, object>,
                        (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
 
@@ -37,8 +48,7 @@ internal static class DataConvert
             operation,
             updateMask,
             captureInstance,
-            body
-        );
+            body);
     }
 
     /// <summary>

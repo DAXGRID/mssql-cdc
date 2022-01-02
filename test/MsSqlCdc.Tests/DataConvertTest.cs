@@ -128,6 +128,70 @@ public class DataConverTest
                 new {
                 })
         };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$operation", (int)Operation.Insert),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+            },
+            "dbo_Animal",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Insert,
+                "MASK",
+                "dbo_Animal",
+                new {
+                })
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                ("__$operation", (int)Operation.Insert),
+            },
+            "dbo_Animal",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Insert,
+                "MASK",
+                "dbo_Animal",
+                new {
+                })
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("Id", 0),
+                ("__$operation", (int)Operation.Delete),
+                ("Name", "Jesper"),
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+            },
+            "dbo_Employee",
+             new ChangeRow<dynamic>(
+                25000L,
+                25002L,
+                Operation.Delete,
+                "MASK",
+                "dbo_Employee",
+                new {
+                    Id = 0,
+                    Name = "Jesper",
+                })
+        };
     }
 
     [Theory]
