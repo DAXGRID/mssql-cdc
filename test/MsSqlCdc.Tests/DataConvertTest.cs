@@ -194,6 +194,47 @@ public class DataConverTest
         };
     }
 
+
+    public static IEnumerable<object[]> InvalidCdcColumnFieldsData()
+    {
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>(),
+            "dbo_Employee",
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+            },
+            "dbo_Employee",
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+            },
+            "dbo_Employee",
+        };
+
+        yield return new object[]
+        {
+            new List<(string name, object fieldValue)>
+            {
+                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+            },
+            "dbo_Employee",
+        };
+    }
+
+
     [Theory]
     [MemberData(nameof(CdcColumnFieldsData))]
     public void Conversion_cdc_column_to_change_row(
@@ -208,16 +249,11 @@ public class DataConverTest
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void Conversion_cdc_column_invalid_when_column_fields_count_less_than_four(int columnFieldsCount)
+    [MemberData(nameof(InvalidCdcColumnFieldsData))]
+    public void Conversion_cdc_column_invalid_when_column_fields_count_less_than_four(
+        List<(string name, object fieldValue)> columnFields,
+        string captureInstance)
     {
-        var captureInstance = "dbo_Employee";
-
-        var columnFields = Enumerable.Range(0, columnFieldsCount)
-            .Select(x => (name: x.ToString(), value: (object)x)).ToList();
 
         Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance)).Should().Throw<Exception>();
     }
