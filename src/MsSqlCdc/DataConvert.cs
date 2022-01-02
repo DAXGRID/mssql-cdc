@@ -19,8 +19,15 @@ internal static class DataConvert
         List<(string fieldName, object fieldValue)> columnFields,
         string captureInstance)
     {
-        if (columnFields.Count < 3)
-            throw new Exception($"Count of column fields should be 4 or greater, instead got '{columnFields.Count}'.");
+        bool isDefaultCdcField(string fieldName) =>
+                fieldName == CdcFieldName.StartLsn ||
+                fieldName == CdcFieldName.SeqVal ||
+                fieldName == CdcFieldName.Operation ||
+                fieldName == CdcFieldName.UpdateMask;
+
+        if (columnFields.Where(x => isDefaultCdcField(x.fieldName)).Count() < 4)
+            throw new ArgumentException(
+                $"The column fields does not contain all the default CDC column fields.");
 
         var startLsn = ConvertBinaryLsn(
             (byte[])columnFields.First(x => x.fieldName == CdcFieldName.StartLsn).fieldValue);
@@ -31,16 +38,10 @@ internal static class DataConvert
         var updateMask = Encoding.UTF8.GetString(
             (byte[])columnFields.First(x => x.fieldName == CdcFieldName.UpdateMask).fieldValue);
 
-        bool isDefaultField(string fieldName) =>
-            fieldName == CdcFieldName.StartLsn ||
-            fieldName == CdcFieldName.SeqVal ||
-            fieldName == CdcFieldName.Operation ||
-            fieldName == CdcFieldName.UpdateMask;
-
         var body = columnFields
-            .Where(x => !isDefaultField(x.fieldName))
-            .Aggregate(new ExpandoObject() as IDictionary<string, object>,
-                       (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
+        .Where(x => !isDefaultCdcField(x.fieldName))
+        .Aggregate(new ExpandoObject() as IDictionary<string, object>,
+                   (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
 
         return new ChangeRow<dynamic>(
             startLsn,
