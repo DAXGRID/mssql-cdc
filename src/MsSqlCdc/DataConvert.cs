@@ -9,7 +9,7 @@ namespace MsSqlCdc;
 internal static class DataConvert
 {
     /// <summary>
-    /// Converts a a colection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
+    /// Converts a a collection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
     /// </summary>
     /// <param name="columnFields">List of tuples with Item1 being the name column and Item2 being the column value</param>
     /// <param name="captureInstance">The tablename of the column.</param>
@@ -54,7 +54,7 @@ internal static class DataConvert
 
     /// <summary>
     /// Convert the binary representation of the line-sequence-number to Int64.
-    /// Automatically handle endianness doing the convertion.
+    /// Automatically handle endianness doing the conversion.
     /// </summary>
     /// <param name="bytes">The byte array representation of the LSN number.</param>
     /// <returns>The Int64 representation of the line-sequence-number.</returns>
@@ -80,7 +80,7 @@ internal static class DataConvert
         };
 
     /// <summary>
-    /// Converts the RelationOperator enum to a string representation to be used in MS-SQL.
+    /// Converts RelationOperator enum to a string representation to be used in MS-SQL.
     /// </summary>
     /// <param name="representation">The enum representation of RelationOperator.</param>
     /// <returns>String representation of RelationOperator.</returns>
@@ -96,7 +96,7 @@ internal static class DataConvert
         };
 
     /// <summary>
-    /// Converts the NetChangesRowFilterOption enum to a string representation to be used in MS-SQL.
+    /// Converts NetChangesRowFilterOption enum to a string representation to be used in MS-SQL.
     /// </summary>
     /// <param name="representation">The enum representation of NetChangesRowFilterOption.</param>
     /// <returns>String representation of NetChangesRowfilterOption.</returns>
@@ -111,7 +111,7 @@ internal static class DataConvert
         };
 
     /// <summary>
-    /// Converts the AllChangesRowFilterOption enum to a string representation to be used in MS-SQL.
+    /// Converts AllChangesRowFilterOption enum to a string representation to be used in MS-SQL.
     /// </summary>
     /// <param name="representation">The enum representation of AllChangesRowFilterOption.</param>
     /// <returns>String representation of AllChangesRowFilterOption.</returns>
