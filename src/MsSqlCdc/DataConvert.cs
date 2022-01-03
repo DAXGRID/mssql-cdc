@@ -33,7 +33,7 @@ internal static class DataConvert
             (byte[])columnFields.First(x => x.fieldName == CdcFieldName.StartLsn).fieldValue);
         var seqVal = ConvertBinaryLsn(
             (byte[])columnFields.First(x => x.fieldName == CdcFieldName.SeqVal).fieldValue);
-        var operation = ConvertIntOperation(
+        var operation = ConvertOperation(
             (int)columnFields.First(x => x.fieldName == CdcFieldName.Operation).fieldValue);
         var updateMask = Encoding.UTF8.GetString(
             (byte[])columnFields.First(x => x.fieldName == CdcFieldName.UpdateMask).fieldValue);
@@ -69,7 +69,7 @@ internal static class DataConvert
     /// <param name="representation">The number representation of the Operation.</param>
     /// <returns>Enum representation of the number representation.</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static Operation ConvertIntOperation(int representation)
+    public static Operation ConvertOperation(int representation)
         => representation switch
         {
             1 => Operation.Delete,

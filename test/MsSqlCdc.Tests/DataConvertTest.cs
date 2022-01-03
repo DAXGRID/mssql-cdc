@@ -290,7 +290,7 @@ public class DataConverTest
     [InlineData(4, Operation.AfterUpdate)]
     public void Operation_valid_number_representation_should_be_converted(int input, Operation expected)
     {
-        var operation = DataConvert.ConvertIntOperation(input);
+        var operation = DataConvert.ConvertOperation(input);
         operation.Should().Be(expected);
     }
 
@@ -303,7 +303,7 @@ public class DataConverTest
     [InlineData(int.MaxValue)]
     public void Operation_invalid_number_representation_should_not_be_converted(int input)
     {
-        Invoking(() => DataConvert.ConvertIntOperation(input)).Should().Throw<ArgumentException>();
+        Invoking(() => DataConvert.ConvertOperation(input)).Should().Throw<ArgumentException>();
     }
 
     [Theory]
