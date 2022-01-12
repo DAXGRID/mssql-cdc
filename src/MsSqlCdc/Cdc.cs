@@ -185,7 +185,8 @@ public static class Cdc
     /// </returns>
     public static async Task<DateTime> MapLsnToTime(SqlConnection connection, BigInteger lsn)
     {
-        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, lsn);
+        var binaryLsn = DataConvert.ConvertLsnBigEridian(lsn);
+        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, binaryLsn);
         if (!lsnToTime.HasValue)
             throw new Exception($"Could not convert LSN to time with LSN being '{lsn}'");
 
@@ -232,7 +233,8 @@ public static class Cdc
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, BigInteger lsn)
     {
-        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, lsn);
+        var binaryLsn = DataConvert.ConvertLsnBigEridian(lsn);
+        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, binaryLsn);
         if (previousLsnBytes is null)
             throw new Exception($"Could not get previous lsn on {nameof(lsn)}: '{lsn}'.");
 
@@ -247,7 +249,8 @@ public static class Cdc
     /// <returns>Get the next log sequence number (LSN) in the sequence based upon the specified LSN.</returns>
     public static async Task<BigInteger> GetNextLsn(SqlConnection connection, BigInteger lsn)
     {
-        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsn);
+        var lsnBinary = DataConvert.ConvertLsnBigEridian(lsn);
+        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsnBinary);
         if (nextLsnBytes is null)
             throw new Exception($"Could not get next lsn on {nameof(lsn)}: '{lsn}'.");
 
@@ -271,9 +274,11 @@ public static class Cdc
         BigInteger toLsn,
         NetChangesRowFilterOption netChangesRowFilterOption = NetChangesRowFilterOption.All)
     {
+        var beginLsnBinary = DataConvert.ConvertLsnBigEridian(fromLsn);
+        var endLsnBinary = DataConvert.ConvertLsnBigEridian(toLsn);
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
-            connection, captureInstance, fromLsn, toLsn, filterOption);
+            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
 
@@ -296,8 +301,11 @@ public static class Cdc
         BigInteger endLsn,
         AllChangesRowFilterOption allChangesRowFilterOption = AllChangesRowFilterOption.All)
     {
+        var beginLsnBinary = DataConvert.ConvertLsnBigEridian(beginLsn);
+        var endLsnBinary = DataConvert.ConvertLsnBigEridian(endLsn);
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
-        var cdcColumns = await CdcDatabase.GetAllChanges(connection, captureInstance, beginLsn, endLsn, filterOption);
+        var cdcColumns = await CdcDatabase.GetAllChanges(
+            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
         return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
     }
 }
