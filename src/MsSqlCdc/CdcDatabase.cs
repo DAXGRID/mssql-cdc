@@ -144,11 +144,7 @@ internal static class CdcDatabase
         long endLsn,
         string filterOption)
     {
-        var builder = new SqlCommandBuilder();
-        // We have to do this here, since we cannot pass the function as command parameter.
-        var function = builder.UnquoteIdentifier($"{cdcFunction}_{captureInstance}");
-
-        var sql = $"SELECT * FROM {function}(@begin_lsn, @end_lsn, @filter_option)";
+        var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
 
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@begin_lsn", beginLsn);
