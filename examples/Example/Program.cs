@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -24,7 +25,7 @@ public class Program
         var changeDataChannel = Channel.CreateUnbounded<IReadOnlyCollection<ChangeRow<dynamic>>>();
         _ = Task.Factory.StartNew(async () =>
         {
-            long lowBoundLsn = await GetStartLsn(connectionString);
+            var lowBoundLsn = await GetStartLsn(connectionString);
             while (true)
             {
                 if (cdcCancellationToken.IsCancellationRequested)
@@ -99,7 +100,7 @@ public class Program
         cdcCancellation.Cancel();
     }
 
-    private static async Task<long> GetStartLsn(string connectionString)
+    private static async Task<BigInteger> GetStartLsn(string connectionString)
     {
         using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
