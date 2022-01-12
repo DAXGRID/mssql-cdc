@@ -11,7 +11,6 @@ internal static class CdcDatabase
     public static async Task<bool?> IsBitSet(SqlConnection connection, int position, string updateMask)
     {
         var sql = "sys.fn_cdc_is_bit_set(@position, @update_mask )";
-
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@position", position);
         command.Parameters.AddWithValue("@updateMask", updateMask);
@@ -47,12 +46,11 @@ internal static class CdcDatabase
         return (int?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<DateTime?> MapLsnToTime(SqlConnection connection, BigInteger lsn)
+    public static async Task<DateTime?> MapLsnToTime(SqlConnection connection, byte[] lsn)
     {
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn)";
-
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
+        command.Parameters.AddWithValue("@lsn", lsn);
 
         return (DateTime?)(await command.ExecuteScalarAsync());
     }
@@ -87,20 +85,20 @@ internal static class CdcDatabase
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<byte[]?> DecrementLsn(SqlConnection connection, BigInteger lsn)
+    public static async Task<byte[]?> DecrementLsn(SqlConnection connection, byte[] lsn)
     {
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
+        command.Parameters.AddWithValue("@lsn", lsn);
 
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<byte[]?> IncrementLsn(SqlConnection connection, BigInteger lsn)
+    public static async Task<byte[]?> IncrementLsn(SqlConnection connection, byte[] lsn)
     {
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
+        command.Parameters.AddWithValue("@lsn", lsn);
 
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
@@ -108,8 +106,8 @@ internal static class CdcDatabase
     public static async Task<List<List<(string fieldName, object fieldValue)>>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
-        BigInteger beginLsn,
-        BigInteger endLsn,
+        byte[] beginLsn,
+        byte[] endLsn,
         string filterOption)
     {
         return await GetChanges(
@@ -124,8 +122,8 @@ internal static class CdcDatabase
     public static async Task<List<List<(string fieldName, object fieldValue)>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
-        BigInteger beginLsn,
-        BigInteger endLsn,
+        byte[] beginLsn,
+        byte[] endLsn,
         string filterOption)
     {
         return await GetChanges(
@@ -141,15 +139,14 @@ internal static class CdcDatabase
         SqlConnection connection,
         string cdcFunction,
         string captureInstance,
-        BigInteger beginLsn,
-        BigInteger endLsn,
+        byte[] beginLsn,
+        byte[] endLsn,
         string filterOption)
     {
         var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
-
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@begin_lsn", beginLsn.ToByteArray());
-        command.Parameters.AddWithValue("@end_lsn", endLsn.ToByteArray());
+        command.Parameters.AddWithValue("@begin_lsn", beginLsn);
+        command.Parameters.AddWithValue("@end_lsn", endLsn);
         command.Parameters.AddWithValue("@filter_option", filterOption);
 
         var changes = new List<List<(string name, object value)>>();
