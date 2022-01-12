@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 namespace MsSqlCdc;
 
@@ -16,12 +17,12 @@ public record ChangeRow<T>
     /// Commit LSN associated with the change that preserves the commit order of the change.
     /// Changes committed in the same transaction share the same commit LSN value.
     /// </summary>
-    public long StartLineSequenceNumber { get; init; }
+    public BigInteger StartLineSequenceNumber { get; init; }
 
     /// <summary>
     /// Sequence value used to order changes to a row within a transaction.
     /// </summary>
-    public long SequenceValue { get; init; }
+    public BigInteger SequenceValue { get; init; }
 
     /// <summary>
     /// Identifies the data manipulation language (DML) operation needed
@@ -47,8 +48,8 @@ public record ChangeRow<T>
     public T Body { get; init; }
 
     public ChangeRow(
-        long startLineSequenceNumber,
-        long sequenceValue,
+        BigInteger startLineSequenceNumber,
+        BigInteger sequenceValue,
         Operation operation,
         string updateMask,
         string captureInstance,

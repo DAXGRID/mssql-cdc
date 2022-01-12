@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Numerics;
 
 namespace MsSqlCdc;
 
@@ -157,7 +158,7 @@ public static class Cdc
     /// Returns the log sequence number (LSN) value from the start_lsn column
     /// in the cdc.lsn_time_mapping system table for the specified time.
     /// </returns>
-    public static async Task<long> MapTimeToLsn(
+    public static async Task<BigInteger> MapTimeToLsn(
         SqlConnection connection,
         DateTime trackingTime,
         RelationalOperator relationalOperator)
@@ -198,7 +199,7 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="captureInstance">The name of the capture instance.</param>
     /// <returns>Return the low endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<long> GetMinLsn(SqlConnection connection, string captureInstance)
+    public static async Task<BigInteger> GetMinLsn(SqlConnection connection, string captureInstance)
     {
         var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance);
         if (minLsnBytes is null)
@@ -214,7 +215,7 @@ public static class Cdc
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<long> GetMaxLsn(SqlConnection connection)
+    public static async Task<BigInteger> GetMaxLsn(SqlConnection connection)
     {
         var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection);
         if (maxLsnBytes is null)
@@ -229,7 +230,7 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the previous LSN.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<long> GetPreviousLsn(SqlConnection connection, long lsn)
+    public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, long lsn)
     {
         var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, lsn);
         if (previousLsnBytes is null)
@@ -244,7 +245,7 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the next LSN.</param>
     /// <returns>Get the next log sequence number (LSN) in the sequence based upon the specified LSN.</returns>
-    public static async Task<long> GetNextLsn(SqlConnection connection, long lsn)
+    public static async Task<BigInteger> GetNextLsn(SqlConnection connection, long lsn)
     {
         var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsn);
         if (nextLsnBytes is null)
