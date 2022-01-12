@@ -183,7 +183,7 @@ public static class Cdc
     /// Returns the date and time value from the tran_end_time column in the cdc.lsn_time_mapping
     /// system table for the specified log sequence number (LSN).
     /// </returns>
-    public static async Task<DateTime> MapLsnToTime(SqlConnection connection, long lsn)
+    public static async Task<DateTime> MapLsnToTime(SqlConnection connection, BigInteger lsn)
     {
         var lsnToTime = await CdcDatabase.MapLsnToTime(connection, lsn);
         if (!lsnToTime.HasValue)
@@ -230,7 +230,7 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the previous LSN.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, long lsn)
+    public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, BigInteger lsn)
     {
         var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, lsn);
         if (previousLsnBytes is null)
@@ -245,7 +245,7 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the next LSN.</param>
     /// <returns>Get the next log sequence number (LSN) in the sequence based upon the specified LSN.</returns>
-    public static async Task<BigInteger> GetNextLsn(SqlConnection connection, long lsn)
+    public static async Task<BigInteger> GetNextLsn(SqlConnection connection, BigInteger lsn)
     {
         var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsn);
         if (nextLsnBytes is null)

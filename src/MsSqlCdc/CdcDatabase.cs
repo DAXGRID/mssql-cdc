@@ -47,7 +47,7 @@ internal static class CdcDatabase
         return (int?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<DateTime?> MapLsnToTime(SqlConnection connection, long lsn)
+    public static async Task<DateTime?> MapLsnToTime(SqlConnection connection, BigInteger lsn)
     {
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn)";
 
@@ -87,7 +87,7 @@ internal static class CdcDatabase
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<byte[]?> DecrementLsn(SqlConnection connection, long lsn)
+    public static async Task<byte[]?> DecrementLsn(SqlConnection connection, BigInteger lsn)
     {
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
@@ -96,7 +96,7 @@ internal static class CdcDatabase
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<byte[]?> IncrementLsn(SqlConnection connection, long lsn)
+    public static async Task<byte[]?> IncrementLsn(SqlConnection connection, BigInteger lsn)
     {
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
