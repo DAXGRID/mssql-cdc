@@ -267,8 +267,8 @@ public static class Cdc
     public static async Task<IReadOnlyCollection<ChangeRow<dynamic>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
-        long fromLsn,
-        long toLsn,
+        BigInteger fromLsn,
+        BigInteger toLsn,
         NetChangesRowFilterOption netChangesRowFilterOption = NetChangesRowFilterOption.All)
     {
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
@@ -292,8 +292,8 @@ public static class Cdc
     public static async Task<IReadOnlyCollection<ChangeRow<dynamic>>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
-        long beginLsn,
-        long endLsn,
+        BigInteger beginLsn,
+        BigInteger endLsn,
         AllChangesRowFilterOption allChangesRowFilterOption = AllChangesRowFilterOption.All)
     {
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);

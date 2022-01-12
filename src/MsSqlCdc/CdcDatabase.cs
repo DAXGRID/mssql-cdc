@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
@@ -107,8 +108,8 @@ internal static class CdcDatabase
     public static async Task<List<List<(string fieldName, object fieldValue)>>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
-        long beginLsn,
-        long endLsn,
+        BigInteger beginLsn,
+        BigInteger endLsn,
         string filterOption)
     {
         return await GetChanges(
@@ -123,8 +124,8 @@ internal static class CdcDatabase
     public static async Task<List<List<(string fieldName, object fieldValue)>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
-        long beginLsn,
-        long endLsn,
+        BigInteger beginLsn,
+        BigInteger endLsn,
         string filterOption)
     {
         return await GetChanges(
@@ -140,8 +141,8 @@ internal static class CdcDatabase
         SqlConnection connection,
         string cdcFunction,
         string captureInstance,
-        long beginLsn,
-        long endLsn,
+        BigInteger beginLsn,
+        BigInteger endLsn,
         string filterOption)
     {
         var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
