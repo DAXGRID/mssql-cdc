@@ -52,7 +52,7 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn)";
 
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn);
+        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
 
         return (DateTime?)(await command.ExecuteScalarAsync());
     }
@@ -91,7 +91,7 @@ internal static class CdcDatabase
     {
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn);
+        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
 
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
@@ -100,7 +100,7 @@ internal static class CdcDatabase
     {
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@lsn", lsn);
+        command.Parameters.AddWithValue("@lsn", lsn.ToByteArray());
 
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
@@ -148,8 +148,8 @@ internal static class CdcDatabase
         var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
 
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@begin_lsn", beginLsn);
-        command.Parameters.AddWithValue("@end_lsn", endLsn);
+        command.Parameters.AddWithValue("@begin_lsn", beginLsn.ToByteArray());
+        command.Parameters.AddWithValue("@end_lsn", endLsn.ToByteArray());
         command.Parameters.AddWithValue("@filter_option", filterOption);
 
         var changes = new List<List<(string name, object value)>>();
