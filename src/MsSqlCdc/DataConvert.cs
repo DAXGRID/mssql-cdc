@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace MsSqlCdc;
@@ -51,17 +52,6 @@ internal static class DataConvert
             captureInstance,
             body);
     }
-
-    /// <summary>
-    /// Convert the binary representation of the line-sequence-number to Int64.
-    /// Automatically handle endianness doing the conversion.
-    /// </summary>
-    /// <param name="bytes">The byte array representation of the LSN number.</param>
-    /// <returns>The Int64 representation of the line-sequence-number.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static long ConvertBinaryLsn(byte[] bytes) => BitConverter.IsLittleEndian
-        ? BitConverter.ToInt64(bytes.Reverse().ToArray())
-        : BitConverter.ToInt64(bytes);
 
     /// <summary>
     /// Converts the number representation to an Enum representation of the value.
@@ -123,4 +113,15 @@ internal static class DataConvert
             AllChangesRowFilterOption.AllUpdateOld => "all update old",
             _ => throw new ArgumentException($"Not valid representation value '{allChangesRowFilterOption}'")
         };
+
+    /// <summary>
+    /// Convert the binary representation of the line-sequence-number to BigInteger.
+    /// Automatically handle endianness doing the conversion.
+    /// </summary>
+    /// <param name="bytes">The byte array representation of the LSN number.</param>
+    /// <returns>The BigInteger representation of the line-sequence-number.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public static BigInteger ConvertBinaryLsn(byte[] bytes) => BitConverter.IsLittleEndian
+        ? new BigInteger(bytes.Reverse().ToArray())
+        : new BigInteger(bytes);
 }
