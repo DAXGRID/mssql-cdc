@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.Text.Json;
 
 namespace MsSqlCdc.Tests;
 
@@ -266,9 +265,7 @@ public class DataConverTest
         ChangeRow expected)
     {
         var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
-
-        // We do this since record type equality operator does not work with dynamic members.
-        JsonSerializer.Serialize(result).Should().Be(JsonSerializer.Serialize(expected));
+        result.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
