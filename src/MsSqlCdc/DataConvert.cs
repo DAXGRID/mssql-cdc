@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -16,8 +15,8 @@ internal static class DataConvert
     /// <param name="captureInstance">The tablename of the column.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
     /// <exception cref="Exception"></exception>
-    public static ChangeRow<dynamic> ConvertCdcColumn(
-        List<(string fieldName, object fieldValue)> columnFields,
+    public static ChangeRow ConvertCdcColumn(
+        IReadOnlyDictionary<string, object> columnFields,
         string captureInstance)
     {
         bool isDefaultCdcField(string fieldName) =>
@@ -26,31 +25,26 @@ internal static class DataConvert
                 fieldName == CdcFieldName.Operation ||
                 fieldName == CdcFieldName.UpdateMask;
 
-        if (columnFields.Where(x => isDefaultCdcField(x.fieldName)).Count() < 4)
+        if (columnFields.Where(x => isDefaultCdcField(x.Key)).Count() < 4)
             throw new ArgumentException(
                 $"The column fields does not contain all the default CDC column fields.");
 
-        var startLsn = ConvertBinaryLsn(
-            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.StartLsn).fieldValue);
-        var seqVal = ConvertBinaryLsn(
-            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.SeqVal).fieldValue);
-        var operation = ConvertOperation(
-            (int)columnFields.First(x => x.fieldName == CdcFieldName.Operation).fieldValue);
-        var updateMask = Encoding.UTF8.GetString(
-            (byte[])columnFields.First(x => x.fieldName == CdcFieldName.UpdateMask).fieldValue);
+        var nonDefaultCdcFields = columnFields
+            .Where(x => !isDefaultCdcField(x.Key))
+            .ToDictionary(x => x.Key, x => x.Value);
 
-        var body = columnFields
-        .Where(x => !isDefaultCdcField(x.fieldName))
-        .Aggregate(new ExpandoObject() as IDictionary<string, object>,
-                   (acc, x) => { acc[x.fieldName] = x.fieldValue; return acc; }) as dynamic;
+        var startLsn = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.StartLsn]);
+        var seqVal = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.SeqVal]);
+        var operation = ConvertOperation((int)columnFields[CdcFieldName.Operation]);
+        var updateMask = Encoding.UTF8.GetString((byte[])columnFields[CdcFieldName.UpdateMask]);
 
-        return new ChangeRow<dynamic>(
+        return new ChangeRow(
             startLsn,
             seqVal,
             operation,
             updateMask,
             captureInstance,
-            body);
+            nonDefaultCdcFields);
     }
 
     /// <summary>

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
@@ -14,7 +13,6 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@position", position);
         command.Parameters.AddWithValue("@updateMask", updateMask);
-
         return (bool?)(await command.ExecuteScalarAsync());
     }
 
@@ -29,7 +27,6 @@ internal static class CdcDatabase
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
         command.Parameters.AddWithValue("@column_name", columnName);
         command.Parameters.AddWithValue("@update_mask", updateMask);
-
         return (bool?)(await command.ExecuteScalarAsync());
     }
 
@@ -42,7 +39,6 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
         command.Parameters.AddWithValue("@column_name", columnName);
-
         return (int?)(await command.ExecuteScalarAsync());
     }
 
@@ -51,7 +47,6 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-
         return (DateTime?)(await command.ExecuteScalarAsync());
     }
 
@@ -64,7 +59,6 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@relational_operator", relationOperator);
         command.Parameters.AddWithValue("@tracking_time", trackingTime);
-
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
@@ -73,7 +67,6 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_get_min_lsn(@capture_instance)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
-
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
@@ -81,7 +74,6 @@ internal static class CdcDatabase
     {
         var sql = "SELECT sys.fn_cdc_get_max_lsn()";
         using var command = new SqlCommand(sql, connection);
-
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
@@ -90,7 +82,6 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
@@ -99,11 +90,10 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-
         return (byte[]?)(await command.ExecuteScalarAsync());
     }
 
-    public static async Task<List<List<(string fieldName, object fieldValue)>>> GetAllChanges(
+    public static async Task<List<IReadOnlyDictionary<string, object>>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
         byte[] beginLsn,
@@ -119,7 +109,7 @@ internal static class CdcDatabase
             filterOption);
     }
 
-    public static async Task<List<List<(string fieldName, object fieldValue)>>> GetNetChanges(
+    public static async Task<List<IReadOnlyDictionary<string, object>>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         byte[] beginLsn,
@@ -135,7 +125,7 @@ internal static class CdcDatabase
             filterOption);
     }
 
-    private static async Task<List<List<(string fieldName, object fieldValue)>>> GetChanges(
+    private static async Task<List<IReadOnlyDictionary<string, object>>> GetChanges(
         SqlConnection connection,
         string cdcFunction,
         string captureInstance,
@@ -149,19 +139,19 @@ internal static class CdcDatabase
         command.Parameters.AddWithValue("@end_lsn", endLsn);
         command.Parameters.AddWithValue("@filter_option", filterOption);
 
-        var changes = new List<List<(string name, object value)>>();
+        var columns = new List<IReadOnlyDictionary<string, object>>();
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var column = new List<(string fieldName, object fieldValue)>();
+            var column = new Dictionary<string, object>();
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                column.Add((reader.GetName(i), reader.GetValue(i)));
+                column.Add(reader.GetName(i), reader.GetValue(i));
             }
 
-            changes.Add(column);
+            columns.Add(column);
         }
 
-        return changes;
+        return columns;
     }
 }
