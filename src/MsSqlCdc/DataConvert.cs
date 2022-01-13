@@ -115,11 +115,19 @@ internal static class DataConvert
         };
 
     /// <summary>
-    /// Convert LSN BigInteger to ByteArray in BigEndian format.
+    /// Convert LSN BigInteger to ByteArray in BigEndian format,
+    /// Also makes sure that the size of the returned byte array is always 10 bytes.
     /// </summary>
     /// <param name="representation">BigInteger representation of LSN.</param>
     /// <returns>Binary array of BigInteger LSN.</returns>
-    public static byte[] ConvertLsnBigEridian(BigInteger lsn) => lsn.ToByteArray().Reverse().ToArray();
+    public static byte[] ConvertLsnBigEndian(BigInteger lsn)
+    {
+        var newArray = new byte[10];
+        var lsnBytes = lsn.ToByteArray(isBigEndian: true);
+        var startAt = newArray.Length - lsnBytes.Length;
+        Array.Copy(lsnBytes, 0, newArray, startAt, lsnBytes.Length);
+        return newArray;
+    }
 
     /// <summary>
     /// Convert the binary representation of the line-sequence-number to BigInteger.
