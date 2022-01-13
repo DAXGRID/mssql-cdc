@@ -267,7 +267,7 @@ public static class Cdc
     /// <returns>
     /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </returns>
-    public static async Task<IReadOnlyCollection<ChangeRow<dynamic>>> GetNetChanges(
+    public static async Task<IReadOnlyCollection<ChangeRow>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         BigInteger fromLsn,
@@ -294,7 +294,7 @@ public static class Cdc
     /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
     /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
     /// </returns>
-    public static async Task<IReadOnlyCollection<ChangeRow<dynamic>>> GetAllChanges(
+    public static async Task<IReadOnlyCollection<ChangeRow>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
         BigInteger beginLsn,

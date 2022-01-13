@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.Text.Json;
 
 namespace MsSqlCdc.Tests;
 
@@ -15,181 +14,181 @@ public class DataConverTest
     {
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.AfterUpdate),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("Id", 10),
-                ("Name", "Rune"),
-                ("Salary", 20000.00),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.AfterUpdate},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"Id", 10},
+                {"Name", "Rune"},
+                {"Salary", 20000.00},
             },
             "dbo_Employee",
-            new ChangeRow<dynamic>(
+            new ChangeRow(
                 25000L,
                 25002L,
                 Operation.AfterUpdate,
                 "MASK",
                 "dbo_Employee",
-                new {
-                    Id = 10,
-                    Name = "Rune",
-                    Salary = 20000.00
+                new Dictionary<string, object> {
+                    {"Id", 10},
+                    {"Name",  "Rune"},
+                    {"Salary",  20000.00}
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.BeforeUpdate),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("Id", 1),
-                ("Name", "Simon"),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.BeforeUpdate},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"Id", 1},
+                {"Name", "Simon"},
             },
             "dbo_Employee",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.BeforeUpdate,
                 "MASK",
                 "dbo_Employee",
-                new {
-                    Id = 1,
-                    Name = "Simon",
+                new Dictionary<string, object> {
+                    {"Id", 1},
+                    {"Name", "Simon"},
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.Delete),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("Id", 0),
-                ("Name", "Jesper"),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.Delete},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"Id", 0},
+                {"Name", "Jesper"},
             },
             "dbo_Employee",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Delete,
                 "MASK",
                 "dbo_Employee",
-                new {
-                    Id = 0,
-                    Name = "Jesper",
+                new Dictionary<string, object>{
+                    {"Id",  0},
+                    {"Name", "Jesper"},
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.Insert),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("Id", 10),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.Insert},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"Id", 10},
             },
             "dbo_Animal",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Insert,
                 "MASK",
                 "dbo_Animal",
-                new {
-                    Id = 10,
+                new Dictionary<string, object>{
+                    {"Id", 10},
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+             new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.Insert),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.Insert},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
             },
             "dbo_Animal",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Insert,
                 "MASK",
                 "dbo_Animal",
-                new {
+                new Dictionary<string, object>{
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$operation", (int)Operation.Insert),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$operation", (int)Operation.Insert},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
             },
             "dbo_Animal",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Insert,
                 "MASK",
                 "dbo_Animal",
-                new {
+                new Dictionary<string, object>{
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("__$operation", (int)Operation.Insert),
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"__$operation", (int)Operation.Insert},
             },
             "dbo_Animal",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Insert,
                 "MASK",
                 "dbo_Animal",
-                new {
+                new Dictionary<string, object>{
                 })
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("Id", 0),
-                ("__$operation", (int)Operation.Delete),
-                ("Name", "Jesper"),
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                {"Id", 0},
+                {"__$operation", (int)Operation.Delete},
+                {"Name", "Jesper"},
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
             },
             "dbo_Employee",
-             new ChangeRow<dynamic>(
+             new ChangeRow(
                 25000L,
                 25002L,
                 Operation.Delete,
                 "MASK",
                 "dbo_Employee",
-                new {
-                    Id = 0,
-                    Name = "Jesper",
+                new Dictionary<string, object>{
+                    {"Id", 0},
+                    {"Name", "Jesper"},
                 })
         };
     }
@@ -198,61 +197,61 @@ public class DataConverTest
     {
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>(),
+            new Dictionary<string, object>(),
             "dbo_Employee",
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
             },
             "dbo_Employee",
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
             },
             "dbo_Employee",
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
             },
             "dbo_Employee",
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("__$update_mask", Encoding.ASCII.GetBytes("MASK")),
-                ("__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()),
-                ("__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()),
-                ("Id", 0),
-                ("Name", "Rune")
+                {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
+                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"Id", 0},
+                {"Name", "Rune"}
             },
             "dbo_Employee",
         };
 
         yield return new object[]
         {
-            new List<(string name, object fieldValue)>
+            new Dictionary<string, object>
             {
-                ("Address", "Streetvalley 20"),
-                ("Salary", 2000.00),
-                ("Id", 0),
-                ("Name", "Rune")
+                {"Address", "Streetvalley 20"},
+                {"Salary", 2000.00},
+                {"Id", 0},
+                {"Name", "Rune"}
             },
             "dbo_Employee",
         };
@@ -261,20 +260,18 @@ public class DataConverTest
     [Theory]
     [MemberData(nameof(CdcColumnFieldsData))]
     public void Conversion_cdc_column_to_change_row(
-        List<(string name, object fieldValue)> columnFields,
+        Dictionary<string, object> columnFields,
         string captureInstance,
-        ChangeRow<dynamic> expected)
+        ChangeRow expected)
     {
         var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
-
-        // We do this since record type equality operator does not work with dynamic members.
-        JsonSerializer.Serialize(result).Should().Be(JsonSerializer.Serialize(expected));
+        result.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
     [MemberData(nameof(CdcDefaultFieldsInvalidData))]
     public void Conversion_cdc_column_without_default_fields_is_invalid(
-        List<(string name, object fieldValue)> columnFields,
+        Dictionary<string, object> columnFields,
         string captureInstance)
     {
         Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance))

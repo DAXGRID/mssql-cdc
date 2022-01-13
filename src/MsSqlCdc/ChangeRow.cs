@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Collections.Generic;
 
 namespace MsSqlCdc;
 
@@ -11,7 +12,7 @@ public enum Operation
     AfterUpdate = 4
 }
 
-public record ChangeRow<T>
+public record ChangeRow
 {
     /// <summary>
     /// Commit LSN associated with the change that preserves the commit order of the change.
@@ -43,9 +44,9 @@ public record ChangeRow<T>
     public string CaptureInstance { get; set; }
 
     /// <summary>
-    /// Dynamic column fields.
+    /// The row fields.
     /// </summary>
-    public T Body { get; init; }
+    public IReadOnlyDictionary<string, object> Fields { get; init; }
 
     public ChangeRow(
         BigInteger startLineSequenceNumber,
@@ -53,10 +54,10 @@ public record ChangeRow<T>
         Operation operation,
         string updateMask,
         string captureInstance,
-        T body)
+        IReadOnlyDictionary<string, object> fields)
     {
-        if (body is null)
-            throw new ArgumentNullException($"{nameof(body)} cannot be null.");
+        if (fields is null)
+            throw new ArgumentNullException($"{nameof(fields)} cannot be null.");
         if (string.IsNullOrWhiteSpace(captureInstance))
             throw new ArgumentNullException($"{nameof(captureInstance)} cannot be null, empty or whitespace.");
 
@@ -65,6 +66,6 @@ public record ChangeRow<T>
         Operation = operation;
         UpdateMask = updateMask;
         CaptureInstance = captureInstance;
-        Body = body;
+        Fields = fields;
     }
 }
