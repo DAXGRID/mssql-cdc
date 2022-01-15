@@ -14,6 +14,26 @@ Usage examples can be found under the [example folder](https://github.com/DAXGRI
 
 ## API
 
+### Get min LSN
+
+Get the start_lsn column value for the specified capture instance from the cdc.change_tables system table. This value represents the low endpoint of the validity interval for the capture instance.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var minLsn = await Cdc.GetMinLsn(connection, "dbo_Employee");
+```
+
+### Get max LSN
+
+Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table. You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var maxLsn = await Cdc.GetMaxLsn(connection);
+```
+
 ### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
@@ -63,26 +83,6 @@ Map date and time value from the tran_end_time column in the cdc.lsn_time_mappin
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var time = await Cdc.MapLsnToTime(connection, 120000);
-```
-
-### Get min LSN
-
-Get the start_lsn column value for the specified capture instance from the cdc.change_tables system table. This value represents the low endpoint of the validity interval for the capture instance.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var minLsn = await Cdc.GetMinLsn(connection, "dbo_Employee");
-```
-
-### Get max LSN
-
-Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.lsn_time_mapping system table. You can use this function to return the high endpoint of the change data capture timeline for any capture instance.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var maxLsn = await Cdc.GetMaxLsn(connection);
 ```
 
 ### Get previous LSN
