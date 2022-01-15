@@ -54,6 +54,26 @@ await connection.OpenAsync();
 var nextLsn = await Cdc.GetNextLsn(connection, 120000);
 ```
 
+### Map time to LSN
+
+Map the log sequence number (LSN) value from the start_lsn column in the cdc.lsn_time_mapping system table for the specified time.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var lsn = await Cdc.MapTimeToLsn(connection, DateTime.UtcNow, RelationalOperator.LargestLessThan);
+```
+
+### Map LSN to time
+
+Map date and time value from the tran_end_time column in the cdc.lsn_time_mapping system table for the specified log sequence number (LSN). You can use this function to systematically map LSN ranges to date ranges in a change table.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var time = await Cdc.MapLsnToTime(connection, 120000);
+```
+
 ### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
@@ -83,26 +103,6 @@ Get the column ordinal of the specified column as it appears in the change table
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
-```
-
-### Map time to LSN
-
-Map the log sequence number (LSN) value from the start_lsn column in the cdc.lsn_time_mapping system table for the specified time.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var lsn = await Cdc.MapTimeToLsn(connection, DateTime.UtcNow, RelationalOperator.LargestLessThan);
-```
-
-### Map LSN to time
-
-Map date and time value from the tran_end_time column in the cdc.lsn_time_mapping system table for the specified log sequence number (LSN). You can use this function to systematically map LSN ranges to date ranges in a change table.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var time = await Cdc.MapLsnToTime(connection, 120000);
 ```
 
 ### Get net changes

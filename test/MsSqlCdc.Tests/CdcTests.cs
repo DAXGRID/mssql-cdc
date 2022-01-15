@@ -22,7 +22,6 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         using var connection = await CreateOpenSqlConnection();
         var captureInstance = "dbo_Employee";
-
         // We insert an Employee to be able to the min LSN for capture instance.
         await InsertEmployee(Guid.NewGuid(), "Rune", "Nielsen");
 
@@ -47,7 +46,6 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     public async Task Get_previous_lsn()
     {
         using var connection = await CreateOpenSqlConnection();
-
         // We use the max LSN to get an realistic LSN number for testing.
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
@@ -63,7 +61,6 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     public async Task Get_next_lsn()
     {
         using var connection = await CreateOpenSqlConnection();
-
         // We use the max LSN to get an realistic LSN number for testing.
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
@@ -72,6 +69,37 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         previousLsn.Should()
             .BeGreaterThan(maxLsn).And
             .BeGreaterThan(default(BigInteger));
+    }
+
+    [Theory]
+    [InlineData(RelationalOperator.LargestLessThan, 0)]
+    [InlineData(RelationalOperator.LargestLessThanOrEqual, 0)]
+    [InlineData(RelationalOperator.SmallestGreaterThan, -100)]
+    [InlineData(RelationalOperator.SmallestGreaterThanOrEqual, -100)]
+    [Trait("Category", "Integration")]
+    public async Task Map_time_to_lsn(RelationalOperator relationalOperator, int secondsFromNow)
+    {
+        using var connection = await CreateOpenSqlConnection();
+        var now = DateTime.UtcNow.AddSeconds(secondsFromNow);
+
+        var lsn = await Cdc.MapTimeToLsn(connection, now, relationalOperator);
+
+        lsn.Should().NotBe(default(BigInteger));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Map_lsn_to_time()
+    {
+        using var connection = await CreateOpenSqlConnection();
+        // We use the max LSN to get an realistic LSN number for testing.
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var time = await Cdc.MapLsnToTime(connection, maxLsn);
+
+        time.ToUniversalTime().Should()
+            .NotBe(default(DateTime)).And
+            .BeBefore(DateTime.UtcNow);
     }
 
     private async Task<SqlConnection> CreateOpenSqlConnection()
