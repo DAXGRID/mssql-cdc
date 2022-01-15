@@ -167,7 +167,7 @@ public static class Cdc
         var lsnBytes = await CdcDatabase.MapTimeToLsn(connection, trackingTime, convertedRelationOperator);
         if (lsnBytes is null)
             throw new Exception(@$"Could not map time to lsn using values {nameof(trackingTime)}: '${trackingTime}'
-                                   and {nameof(relationalOperator)}: '${convertedRelationOperator}.
+                                   and {nameof(relationalOperator)}: '{convertedRelationOperator}.
                                    Response was empty.");
         return DataConvert.ConvertBinaryLsn(lsnBytes);
     }

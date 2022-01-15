@@ -7,6 +7,22 @@ executors:
       auth:
         username: $DOCKER_LOGIN
         password: $DOCKER_ACCESSTOKEN
+
+  dotnet-core-sdk-and-mssql-service:
+    docker:
+    - image: mcr.microsoft.com/dotnet/sdk:6.0
+      auth:
+        username: $DOCKER_LOGIN
+        password: $DOCKER_ACCESSTOKEN
+    - image: mcr.microsoft.com/mssql/server:2019-CU13-ubuntu-20.04 # For integration testing
+      auth:
+        username: $DOCKER_LOGIN
+        password: $DOCKER_ACCESSTOKEN
+      environment:
+        SA_PASSWORD: myAwesomePassword1
+        MSSQL_AGENT_ENABLED: True
+        ACCEPT_EULA: Y
+
 jobs:
   build-app:
     executor: dotnet-core-sdk
@@ -17,9 +33,20 @@ jobs:
           command: dotnet build
 
   test-app:
-    executor: dotnet-core-sdk
+    executor: dotnet-core-sdk-and-mssql-service
     steps:
       - checkout
+      - run:
+          name: install dockerize
+          command: |
+            wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+            tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+            rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:1433 -timeout 1m
       - run:
           name: Test
           command: dotnet test
