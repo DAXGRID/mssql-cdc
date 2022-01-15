@@ -34,6 +34,26 @@ await connection.OpenAsync();
 var maxLsn = await Cdc.GetMaxLsn(connection);
 ```
 
+### Get previous LSN
+
+Get the previous log sequence number (LSN) in the sequence based upon the specified LSN.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var previousLsn = await Cdc.GetPreviousLsn(connection, 120000);
+```
+
+### Get next LSN
+
+Get the next log sequence number (LSN) in the sequence based upon the specified LSN.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var nextLsn = await Cdc.GetNextLsn(connection, 120000);
+```
+
 ### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
@@ -83,26 +103,6 @@ Map date and time value from the tran_end_time column in the cdc.lsn_time_mappin
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var time = await Cdc.MapLsnToTime(connection, 120000);
-```
-
-### Get previous LSN
-
-Get the previous log sequence number (LSN) in the sequence based upon the specified LSN.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var previousLsn = await Cdc.GetPreviousLsn(connection, 120000);
-```
-
-### Get next LSN
-
-Get the next log sequence number (LSN) in the sequence based upon the specified LSN.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var nextLsn = await Cdc.GetNextLsn(connection, 120000);
 ```
 
 ### Get net changes

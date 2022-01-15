@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
@@ -27,7 +28,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
 
-        minLsn.Should().BeGreaterThan(0);
+        minLsn.Should().NotBe(default(BigInteger));
     }
 
     [Fact]
@@ -38,7 +39,39 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
-        maxLsn.Should().BeGreaterThan(0);
+        maxLsn.Should().NotBe(default(BigInteger));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_previous_lsn()
+    {
+        using var connection = await CreateOpenSqlConnection();
+
+        // We use the max LSN to get an realistic LSN number for testing.
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var previousLsn = await Cdc.GetPreviousLsn(connection, maxLsn);
+
+        previousLsn.Should()
+            .BeLessThan(maxLsn).And
+            .NotBe(default(BigInteger));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_next_lsn()
+    {
+        using var connection = await CreateOpenSqlConnection();
+
+        // We use the max LSN to get an realistic LSN number for testing.
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var previousLsn = await Cdc.GetNextLsn(connection, maxLsn);
+
+        previousLsn.Should()
+            .BeGreaterThan(maxLsn).And
+            .BeGreaterThan(default(BigInteger));
     }
 
     private async Task<SqlConnection> CreateOpenSqlConnection()
