@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Microsoft.Data.SqlClient;
 using Xunit;
 
@@ -20,10 +22,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     [Trait("Category", "Integration")]
     public async Task Get_min_lsn()
     {
-        using var connection = await CreateOpenSqlConnection();
         var captureInstance = "dbo_Employee";
-        // We insert an Employee to be able to the min LSN for capture instance.
-        await InsertEmployee(Guid.NewGuid(), "Rune", "Nielsen");
+        using var connection = await CreateOpenSqlConnection();
 
         var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
 
@@ -100,6 +100,97 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         time.ToUniversalTime().Should()
             .NotBe(default(DateTime)).And
             .BeBefore(DateTime.UtcNow);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_all_changes_rowfilter_all()
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var netChanges = (await Cdc.GetAllChanges(
+            connection,
+            captureInstance,
+            minLsn,
+            maxLsn,
+            AllChangesRowFilterOption.All)).ToArray();
+
+        var insert = netChanges[0];
+        var afterUpdate = netChanges[1];
+
+        using (var scope = new AssertionScope())
+        {
+            netChanges.Length.Should().Be(2);
+            insert.CaptureInstance.Should().Be(captureInstance);
+            insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+            insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+            insert.Operation.Should().Be(Operation.Insert);
+            insert.Fields["id"].Should().NotBeNull();
+            insert.Fields["first_name"].Should().Be("Rune");
+            insert.Fields["last_name"].Should().Be("Nielsen");
+
+            afterUpdate.CaptureInstance.Should().Be(captureInstance);
+            afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+            afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+            afterUpdate.Operation.Should().Be(Operation.AfterUpdate);
+            afterUpdate.Fields["id"].Should().NotBeNull();
+            afterUpdate.Fields["first_name"].Should().Be("Rune");
+            afterUpdate.Fields["last_name"].Should().Be("Jensen");
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_all_changes_rowfilter_all_update_old()
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var netChanges = (await Cdc.GetAllChanges(
+            connection,
+            captureInstance,
+            minLsn,
+            maxLsn,
+            AllChangesRowFilterOption.AllUpdateOld)).ToArray();
+
+        var insert = netChanges[0];
+        var beforeUpdate = netChanges[1];
+        var afterUpdate = netChanges[2];
+
+        using (var scope = new AssertionScope())
+        {
+            netChanges.Length.Should().Be(3);
+            insert.CaptureInstance.Should().Be(captureInstance);
+            insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+            insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+            insert.Operation.Should().Be(Operation.Insert);
+            insert.Fields["id"].Should().NotBeNull();
+            insert.Fields["first_name"].Should().Be("Rune");
+            insert.Fields["last_name"].Should().Be("Nielsen");
+
+            beforeUpdate.CaptureInstance.Should().Be(captureInstance);
+            beforeUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+            beforeUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+            beforeUpdate.Operation.Should().Be(Operation.BeforeUpdate);
+            beforeUpdate.Fields["id"].Should().NotBeNull();
+            beforeUpdate.Fields["first_name"].Should().Be("Rune");
+            beforeUpdate.Fields["last_name"].Should().Be("Nielsen");
+
+            afterUpdate.CaptureInstance.Should().Be(captureInstance);
+            afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+            afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+            afterUpdate.Operation.Should().Be(Operation.AfterUpdate);
+            afterUpdate.Fields["id"].Should().NotBeNull();
+            afterUpdate.Fields["first_name"].Should().Be("Rune");
+            afterUpdate.Fields["last_name"].Should().Be("Jensen");
+        }
     }
 
     private async Task<SqlConnection> CreateOpenSqlConnection()

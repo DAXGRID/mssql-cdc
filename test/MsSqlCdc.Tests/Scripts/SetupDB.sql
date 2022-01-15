@@ -22,3 +22,12 @@ EXECUTE sys.sp_cdc_enable_table
     @source_name = N'employee',
     @role_name = N'null';
 GO
+
+INSERT INTO [dbo].[employee] ([id], [first_name], [last_name])
+VALUES('653f11df-ee89-4e17-ac01-d6542f007ea1', 'Rune', 'Nielsen');
+GO
+
+UPDATE [dbo].[employee]
+SET [last_Name] = 'Jensen'
+WHERE [id] = '653f11df-ee89-4e17-ac01-d6542f007ea1';
+GO

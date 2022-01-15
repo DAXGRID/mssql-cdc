@@ -74,6 +74,26 @@ await connection.OpenAsync();
 var time = await Cdc.MapLsnToTime(connection, 120000);
 ```
 
+### Get all changes
+
+Get one row for each change applied to the source table within the specified log sequence number (LSN) range. If a source row had multiple changes during the interval, each change is represented in the returned result set.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var allChanges = await Cdc.GetAllChanges(connection, "dbo_Employee", 120000, 120020);
+```
+
+### Get net changes
+
+Get one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120020);
+```
+
 ### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
@@ -103,26 +123,6 @@ Get the column ordinal of the specified column as it appears in the change table
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
-```
-
-### Get net changes
-
-Get one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120020);
-```
-
-### Get all changes
-
-Get one row for each change applied to the source table within the specified log sequence number (LSN) range. If a source row had multiple changes during the interval, each change is represented in the returned result set.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var allChanges = await Cdc.GetAllChanges(connection, "dbo_Employee", 120000, 120020);
 ```
 
 ## Setup CDC on MS-SQL Server
