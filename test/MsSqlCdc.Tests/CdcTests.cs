@@ -196,25 +196,98 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 });
     }
 
-    // [Fact]
-    // [Trait("Category", "Integration")]
-    // public async Task Get_net_changes()
-    // {
-    //     var captureInstance = "dbo_Employee";
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_net_changes_all()
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
 
-    //     using var connection = await CreateOpenSqlConnection();
-    //     var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-    //     var maxLsn = await Cdc.GetMaxLsn(connection);
+        var netChanges = await Cdc.GetNetChanges(
+            connection,
+            "dbo_Employee",
+            minLsn,
+            maxLsn,
+            NetChangesRowFilterOption.All);
 
-    //     var netChanges = await Cdc.GetNetChanges(
-    //         connection,
-    //         "dbo_Employee",
-    //         minLsn,
-    //         maxLsn,
-    //         NetChangesRowFilterOption.All);
+        netChanges
+            .Should()
+            .HaveCount(1).And
+            .SatisfyRespectively(
+                netChange =>
+                {
+                    netChange.CaptureInstance.Should().Be(captureInstance);
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.UpdateMask.Should().BeNull();
+                    netChange.Operation.Should().Be(NetChangeOperation.Insert);
+                    netChange.Fields["first_name"].Should().Be("Rune");
+                    netChange.Fields["last_name"].Should().Be("Jensen");
+                });
+    }
 
-    //     netChanges.Should().HaveCount(2);
-    // }
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_net_changes_all_with_mask()
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var netChanges = await Cdc.GetNetChanges(
+            connection,
+            "dbo_Employee",
+            minLsn,
+            maxLsn,
+            NetChangesRowFilterOption.AllWithMask);
+
+        netChanges
+            .Should()
+            .HaveCount(1).And
+            .SatisfyRespectively(
+                netChange =>
+                {
+                    netChange.CaptureInstance.Should().Be(captureInstance);
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.UpdateMask.Should().NotBeEmpty();
+                    netChange.Operation.Should().Be(NetChangeOperation.Insert);
+                    netChange.Fields["first_name"].Should().Be("Rune");
+                    netChange.Fields["last_name"].Should().Be("Jensen");
+                });
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Get_net_changes_all_with_merge()
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var netChanges = await Cdc.GetNetChanges(
+            connection,
+            "dbo_Employee",
+            minLsn,
+            maxLsn,
+            NetChangesRowFilterOption.AllWithMerge);
+
+        netChanges
+            .Should()
+            .HaveCount(1).And
+            .SatisfyRespectively(
+                netChange =>
+                {
+                    netChange.CaptureInstance.Should().Be(captureInstance);
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.UpdateMask.Should().NotBeEmpty();
+                    netChange.Operation.Should().Be(NetChangeOperation.InsertOrUpdate);
+                    netChange.Fields["first_name"].Should().Be("Rune");
+                    netChange.Fields["last_name"].Should().Be("Jensen");
+                });
+    }
 
     private async Task<SqlConnection> CreateOpenSqlConnection()
     {

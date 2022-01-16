@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace MsSqlCdc;
@@ -21,18 +22,21 @@ internal static class NetChangeRowFactory
         if (GetRequiredFields(fields).Count() < 3)
             throw new ArgumentException($"The column fields does not contain all the default CDC column fields.");
 
-        var startLsn = DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
-        var operation = ConvertOperation((int)fields[CdcFieldName.Operation]);
-        var updateMask = Encoding.UTF8.GetString((byte[])fields[CdcFieldName.UpdateMask]);
-        var optionalFields = GetOptionalFields(fields);
-
         return new NetChangeRow(
-            startLsn,
-            operation,
-            updateMask,
+            GetStartLsn(fields),
+            GetOperation(fields),
+            GetUpdateMask(fields),
             captureInstance,
-            optionalFields);
+            GetAdditionalFields(fields));
     }
+
+    private static BigInteger GetStartLsn(IReadOnlyDictionary<string, object> fields) =>
+        DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
+
+    private static string? GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
+        fields[CdcFieldName.UpdateMask] != DBNull.Value
+        ? Encoding.UTF8.GetString((byte[])fields[CdcFieldName.UpdateMask])
+        : null;
 
     private static bool IsRequiredField(string fieldName) =>
         fieldName == CdcFieldName.StartLsn ||
@@ -40,11 +44,13 @@ internal static class NetChangeRowFactory
         fieldName == CdcFieldName.UpdateMask;
 
     private static IEnumerable<KeyValuePair<string, object>> GetRequiredFields(
-        IReadOnlyDictionary<string, object> fields)
-        => fields.Where(x => IsRequiredField(x.Key));
+        IReadOnlyDictionary<string, object> fields) => fields.Where(x => IsRequiredField(x.Key));
 
-    private static Dictionary<string, object> GetOptionalFields(IReadOnlyDictionary<string, object> fields)
+    private static Dictionary<string, object> GetAdditionalFields(IReadOnlyDictionary<string, object> fields)
         => fields.Where(x => !IsRequiredField(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+
+    private static NetChangeOperation GetOperation(IReadOnlyDictionary<string, object> fields) =>
+         ConvertOperation((int)fields[CdcFieldName.Operation]);
 
     private static NetChangeOperation ConvertOperation(int representation)
         => representation switch

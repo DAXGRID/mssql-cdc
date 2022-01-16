@@ -175,6 +175,29 @@ public class NetChangeRowFactoryTests
                     {"Name", "Jesper"},
                 })
         };
+
+        // The important part with this one is that update_mask can be DBNull.Value
+        yield return new object[]
+        {
+            new Dictionary<string, object>
+            {
+                {"__$operation", (int)NetChangeOperation.Delete},
+                {"__$update_mask", DBNull.Value},
+                {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
+                {"Id", 0},
+                {"Name", "Jesper"},
+            },
+            "dbo_Employee",
+             new NetChangeRow(
+                25000L,
+                NetChangeOperation.Delete,
+                null,
+                "dbo_Employee",
+                new Dictionary<string, object>{
+                    {"Id", 0},
+                    {"Name", "Jesper"},
+                })
+        };
     }
 
     public static IEnumerable<object[]> InvalidNetChangesFieldData()
