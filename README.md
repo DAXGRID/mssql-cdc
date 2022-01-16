@@ -130,17 +130,6 @@ var updateMask = changes.First().UpdateMask;
 var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
 ```
 
-### Get is bit set
-
-Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
-var isBitSet = await Cdc.IsBitSet(connection, columnOrdinal, "my_update_mask");
-```
-
 ## Setup CDC on MS-SQL Server
 
 First make sure that you've enabled the MS-SQL agent, otherwise changes won't be captured in the CDC tables.
