@@ -279,7 +279,7 @@ public static class Cdc
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
-        return cdcColumns.Select(x => DataConvert.CreateAllChangeRow(x, captureInstance)).ToList();
+        return cdcColumns.Select(x => AllChangeRowFactory.Create(x, captureInstance)).ToList();
     }
 
     /// <summary>
@@ -306,6 +306,6 @@ public static class Cdc
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetAllChanges(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
-        return cdcColumns.Select(x => DataConvert.CreateAllChangeRow(x, captureInstance)).ToList();
+        return cdcColumns.Select(x => AllChangeRowFactory.Create(x, captureInstance)).ToList();
     }
 }

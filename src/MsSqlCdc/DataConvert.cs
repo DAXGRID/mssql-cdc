@@ -9,38 +9,37 @@ namespace MsSqlCdc;
 internal static class DataConvert
 {
     /// <summary>
-    /// Converts a a collection of columns represented as Dictionary<string, object> to ChangeData representation.
+    /// Converts a a collection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
     /// </summary>
-    /// <param name="columnFields">Dictionary of field name and field value.</param>
-    /// <param name="captureInstance">The capture instance.</param>
+    /// <param name="columnFields">List of tuples with Item1 being the name column and Item2 being the column value</param>
+    /// <param name="captureInstance">The tablename of the column.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
     /// <exception cref="Exception"></exception>
-    public static AllChangeRow CreateAllChangeRow(
+    private static NetChangeRow CreateNetChangeRow(
         IReadOnlyDictionary<string, object> columnFields,
         string captureInstance)
     {
         bool isDefaultCdcField(string fieldName) =>
                 fieldName == CdcFieldName.StartLsn ||
-                fieldName == CdcFieldName.SeqVal ||
                 fieldName == CdcFieldName.Operation ||
                 fieldName == CdcFieldName.UpdateMask;
 
-        if (columnFields.Where(x => isDefaultCdcField(x.Key)).Count() < 4)
+        if (columnFields.Where(x => isDefaultCdcField(x.Key)).Count() < 3)
+        {
             throw new ArgumentException(
                         $"The column fields does not contain all the default CDC column fields.");
+        }
 
         var nonDefaultCdcFields = columnFields
             .Where(x => !isDefaultCdcField(x.Key))
             .ToDictionary(x => x.Key, x => x.Value);
 
         var startLsn = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.StartLsn]);
-        var seqVal = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.SeqVal]);
-        var operation = ConvertOperation((int)columnFields[CdcFieldName.Operation]);
+        var operation = ConvertNetChangeOperation((int)columnFields[CdcFieldName.Operation]);
         var updateMask = Encoding.UTF8.GetString((byte[])columnFields[CdcFieldName.UpdateMask]);
 
-        return new AllChangeRow(
+        return new NetChangeRow(
             startLsn,
-            seqVal,
             operation,
             updateMask,
             captureInstance,
@@ -48,62 +47,21 @@ internal static class DataConvert
     }
 
     /// <summary>
-    /// Converts a a collection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
-    /// </summary>
-    /// <param name="columnFields">List of tuples with Item1 being the name column and Item2 being the column value</param>
-    /// <param name="captureInstance">The tablename of the column.</param>
-    /// <returns>Returns the CDC column as a ChangeData record.</returns>
-    /// <exception cref="Exception"></exception>
-    // private static ChangeRow ConvertCdcColumn(
-    //     IReadOnlyDictionary<string, object> columnFields,
-    //     string captureInstance)
-    // {
-    //     bool isDefaultCdcField(string fieldName) =>
-    //             fieldName == CdcFieldName.StartLsn ||
-    //             fieldName == CdcFieldName.SeqVal ||
-    //             fieldName == CdcFieldName.Operation ||
-    //             fieldName == CdcFieldName.UpdateMask;
-
-    //     if (columnFields.Where(x => isDefaultCdcField(x.Key)).Count() < 4)
-    //     {
-    //         Console.WriteLine(JsonSerializer.Serialize(columnFields));
-    //         throw new ArgumentException(
-    //                     $"The column fields does not contain all the default CDC column fields.");
-    //     }
-
-    //     var nonDefaultCdcFields = columnFields
-    //         .Where(x => !isDefaultCdcField(x.Key))
-    //         .ToDictionary(x => x.Key, x => x.Value);
-
-    //     var startLsn = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.StartLsn]);
-    //     var seqVal = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.SeqVal]);
-    //     var operation = ConvertOperation((int)columnFields[CdcFieldName.Operation]);
-    //     var updateMask = Encoding.UTF8.GetString((byte[])columnFields[CdcFieldName.UpdateMask]);
-
-    //     return new ChangeRow(
-    //         startLsn,
-    //         seqVal,
-    //         operation,
-    //         updateMask,
-    //         captureInstance,
-    //         nonDefaultCdcFields);
-    // }
-
-    /// <summary>
     /// Converts the number representation to an Enum representation of the value.
     /// </summary>
     /// <param name="representation">The number representation of the Operation.</param>
     /// <returns>Enum representation of the number representation.</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static AllChangeOperation ConvertOperation(int representation)
+    public static NetChangeOperation ConvertNetChangeOperation(int representation)
         => representation switch
         {
-            1 => AllChangeOperation.Delete,
-            2 => AllChangeOperation.Insert,
-            3 => AllChangeOperation.BeforeUpdate,
-            4 => AllChangeOperation.AfterUpdate,
+            1 => NetChangeOperation.Delete,
+            2 => NetChangeOperation.Insert,
+            4 => NetChangeOperation.Update,
+            5 => NetChangeOperation.InsertOrUpdate,
             _ => throw new ArgumentException($"Not valid representation value '{representation}'")
         };
+
 
     /// <summary>
     /// Converts RelationOperator enum to a string representation to be used in MS-SQL.
