@@ -29,8 +29,8 @@ internal static class AllChangeRowFactory
             GetAdditionalFields(fields));
     }
 
-    private static string GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
-        Encoding.UTF8.GetString((byte[])fields[CdcFieldName.UpdateMask]);
+    private static byte[] GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
+        (byte[])fields[CdcFieldName.UpdateMask];
 
     private static BigInteger GetSeqVal(IReadOnlyDictionary<string, object> fields) =>
         DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.SeqVal]);

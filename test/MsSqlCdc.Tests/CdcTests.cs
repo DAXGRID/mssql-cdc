@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -251,7 +252,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    netChange.UpdateMask.Should().NotBeEmpty();
+                    netChange.UpdateMask.Should().BeNull(); // TODO take a look at this
                     netChange.Operation.Should().Be(NetChangeOperation.Insert);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
@@ -282,7 +283,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    netChange.UpdateMask.Should().NotBeEmpty();
+                    netChange.UpdateMask.Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.InsertOrUpdate);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
@@ -315,6 +316,32 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
 
         columnOrdinal.Should().Be(-1);
+    }
+
+    [Theory]
+    [InlineData("first_name", false)]
+    [InlineData("last_name", true)]
+    [Trait("Category", "Integration")]
+    public async Task Has_column_changed(string columnName, bool expected)
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsn(connection);
+
+        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
+        var changes = await Cdc.GetAllChanges(
+                              connection,
+                              captureInstance,
+                              minLsn,
+                              maxLsn,
+                              AllChangesRowFilterOption.AllUpdateOld);
+
+        var updateMask = changes.Last().UpdateMask;
+
+        var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+
+        hasColumnChanged.Should().Be(expected);
     }
 
     private async Task<SqlConnection> CreateOpenSqlConnection()

@@ -20,9 +20,9 @@ internal static class CdcDatabase
         SqlConnection connection,
         string captureInstance,
         string columnName,
-        string updateMask)
+        byte[] updateMask)
     {
-        var sql = "sys.fn_cdc_has_column_changed(@capture_instance, @column_name, @update_mask)";
+        var sql = "SELECT sys.fn_cdc_has_column_changed(@capture_instance, @column_name, @update_mask)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
         command.Parameters.AddWithValue("@column_name", columnName);
