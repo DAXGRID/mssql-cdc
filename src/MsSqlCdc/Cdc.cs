@@ -130,6 +130,7 @@ public static class Cdc
     /// <returns>
     /// Returns the column ordinal of the specified column as it appears in the change
     /// table associated with the specified capture instance.
+    /// If the column ordinal could not be found -1 is returned.
     /// </returns>
     public static async Task<int> GetColumnOrdinal(
         SqlConnection connection,
@@ -137,11 +138,7 @@ public static class Cdc
         string columnName)
     {
         var columnOrdinal = await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName);
-        if (!columnOrdinal.HasValue)
-            throw new Exception(@$"Could not get column ordinal on values {nameof(captureInstance)}: '{captureInstance}'
-                                   and {nameof(columnName)}: '{columnName}'.");
-
-        return columnOrdinal.Value;
+        return columnOrdinal.HasValue ? columnOrdinal.Value : -1;
     }
 
     /// <summary>

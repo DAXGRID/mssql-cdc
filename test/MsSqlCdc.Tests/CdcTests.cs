@@ -289,6 +289,34 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 });
     }
 
+    [Theory]
+    [InlineData("first_name", 2)]
+    [InlineData("last_name", 3)]
+    [Trait("Category", "Integration")]
+    public async Task Get_column_ordinal(string columnName, int expected)
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+
+        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
+
+        columnOrdinal.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("i_dont_exist_one")]
+    [InlineData("i_dont_exist_two")]
+    [Trait("Category", "Integration")]
+    public async Task Get_column_ordinal_on_nonexistent_column_name(string columnName)
+    {
+        var captureInstance = "dbo_Employee";
+        using var connection = await CreateOpenSqlConnection();
+
+        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
+
+        columnOrdinal.Should().Be(-1);
+    }
+
     private async Task<SqlConnection> CreateOpenSqlConnection()
     {
         var connection = new SqlConnection(_databaseFixture.ConnectionString);

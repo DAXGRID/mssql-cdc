@@ -94,6 +94,16 @@ await connection.OpenAsync();
 var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120020);
 ```
 
+### Get column ordinal
+
+Get the column ordinal of the specified column as it appears in the change table associated with the specified capture instance.
+
+```c#
+using var connection = new SqlConnection("myConnectionString");
+await connection.OpenAsync();
+var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
+```
+
 ### Get is bit set
 
 Indicates whether a captured column has been updated by checking whether its ordinal position is set within a provided bitmask.
@@ -113,16 +123,6 @@ Identifies whether the update mask on the specified column has been updated in t
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 await Cdc.HasColumnChanged(connection, "dbo_Employee", "Salary", "my_update_mask");
-```
-
-### Get column ordinal
-
-Get the column ordinal of the specified column as it appears in the change table associated with the specified capture instance.
-
-```c#
-using var connection = new SqlConnection("myConnectionString");
-await connection.OpenAsync();
-var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
 ```
 
 ## Setup CDC on MS-SQL Server
