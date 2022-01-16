@@ -107,7 +107,7 @@ public static class Cdc
         SqlConnection connection,
         string captureInstance,
         string columnName,
-        string updateMask)
+        byte[] updateMask)
     {
         var hasColumnChanged = await CdcDatabase.HasColumnChanged(connection, captureInstance, columnName, updateMask);
         if (!hasColumnChanged.HasValue)

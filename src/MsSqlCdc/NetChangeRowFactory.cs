@@ -33,9 +33,9 @@ internal static class NetChangeRowFactory
     private static BigInteger GetStartLsn(IReadOnlyDictionary<string, object> fields) =>
         DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
 
-    private static string? GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
+    private static byte[]? GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
         fields[CdcFieldName.UpdateMask] != DBNull.Value
-        ? Encoding.UTF8.GetString((byte[])fields[CdcFieldName.UpdateMask])
+        ? (byte[])fields[CdcFieldName.UpdateMask]
         : null;
 
     private static bool IsRequiredField(string fieldName) =>

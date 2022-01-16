@@ -41,7 +41,7 @@ public record NetChangeRow
     /// This value has all defined bits set to 1 when __$operation = 1 or 2. When __$operation = 3 or 4,
     /// only those bits corresponding to columns that changed are set to 1.
     /// </summary>
-    public string? UpdateMask { get; init; }
+    public byte[]? UpdateMask { get; init; }
 
     /// <summary>
     /// The name of the capture instance associated with the change.
@@ -56,7 +56,7 @@ public record NetChangeRow
     public NetChangeRow(
         BigInteger startLineSequenceNumber,
         NetChangeOperation operation,
-        string? updateMask,
+        byte[]? updateMask,
         string captureInstance,
         IReadOnlyDictionary<string, object> fields)
     {

@@ -36,7 +36,7 @@ public record AllChangeRow
     /// This value has all defined bits set to 1 when __$operation = 1 or 2. When __$operation = 3 or 4,
     /// only those bits corresponding to columns that changed are set to 1.
     /// </summary>
-    public string UpdateMask { get; init; }
+    public byte[] UpdateMask { get; init; }
 
     /// <summary>
     /// The name of the capture instance associated with the change.
@@ -52,7 +52,7 @@ public record AllChangeRow
         BigInteger startLineSequenceNumber,
         BigInteger sequenceValue,
         AllChangeOperation operation,
-        string updateMask,
+        byte[] updateMask,
         string captureInstance,
         IReadOnlyDictionary<string, object> fields)
     {

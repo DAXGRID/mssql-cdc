@@ -20,7 +20,8 @@ GO
 EXECUTE sys.sp_cdc_enable_table
     @source_schema = N'dbo',
     @source_name = N'employee',
-    @role_name = N'null';
+    @role_name = N'null',
+    @supports_net_changes = 1;
 GO
 
 INSERT INTO [dbo].[employee] ([id], [first_name], [last_name])
