@@ -7,15 +7,6 @@ namespace MsSqlCdc;
 
 internal static class CdcDatabase
 {
-    public static async Task<bool?> IsBitSet(SqlConnection connection, int position, string updateMask)
-    {
-        var sql = "sys.fn_cdc_is_bit_set(@position, @update_mask )";
-        using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@position", position);
-        command.Parameters.AddWithValue("@updateMask", updateMask);
-        return (bool?)(await command.ExecuteScalarAsync());
-    }
-
     public static async Task<bool?> HasColumnChanged(
         SqlConnection connection,
         string captureInstance,
