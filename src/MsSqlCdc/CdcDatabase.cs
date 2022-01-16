@@ -39,7 +39,8 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
         command.Parameters.AddWithValue("@column_name", columnName);
-        return (int?)(await command.ExecuteScalarAsync());
+        var columnOrdinal = await command.ExecuteScalarAsync();
+        return columnOrdinal != DBNull.Value ? (int?)columnOrdinal : null;
     }
 
     public static async Task<DateTime?> MapLsnToTime(SqlConnection connection, byte[] lsn)
