@@ -18,7 +18,8 @@ internal static class CdcDatabase
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
         command.Parameters.AddWithValue("@column_name", columnName);
         command.Parameters.AddWithValue("@update_mask", updateMask);
-        return (bool?)(await command.ExecuteScalarAsync());
+        var hasColumnChanged = await command.ExecuteScalarAsync();
+        return hasColumnChanged != DBNull.Value ? (bool?)hasColumnChanged : null;
     }
 
     public static async Task<int?> GetColumnOrdinal(
@@ -39,7 +40,8 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_map_lsn_to_time(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-        return (DateTime?)(await command.ExecuteScalarAsync());
+        var lsnTime = await command.ExecuteScalarAsync();
+        return lsnTime != DBNull.Value ? (DateTime?)lsnTime : null;
     }
 
     public static async Task<byte[]?> MapTimeToLsn(
@@ -51,7 +53,8 @@ internal static class CdcDatabase
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@relational_operator", relationOperator);
         command.Parameters.AddWithValue("@tracking_time", trackingTime);
-        return (byte[]?)(await command.ExecuteScalarAsync());
+        var lsnBasedOnTime = await command.ExecuteScalarAsync();
+        return lsnBasedOnTime != DBNull.Value ? (byte[]?)lsnBasedOnTime : null;
     }
 
     public static async Task<byte[]?> GetMinLsn(SqlConnection connection, string captureInstance)
@@ -59,14 +62,16 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_get_min_lsn(@capture_instance)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@capture_instance", captureInstance);
-        return (byte[]?)(await command.ExecuteScalarAsync());
+        var minLsn = await command.ExecuteScalarAsync();
+        return minLsn != DBNull.Value ? (byte[]?)minLsn : null;
     }
 
     public static async Task<byte[]?> GetMaxLsn(SqlConnection connection)
     {
         var sql = "SELECT sys.fn_cdc_get_max_lsn()";
         using var command = new SqlCommand(sql, connection);
-        return (byte[]?)(await command.ExecuteScalarAsync());
+        var maxLsn = await command.ExecuteScalarAsync();
+        return maxLsn != DBNull.Value ? (byte[]?)maxLsn : null;
     }
 
     public static async Task<byte[]?> DecrementLsn(SqlConnection connection, byte[] lsn)
@@ -74,7 +79,8 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-        return (byte[]?)(await command.ExecuteScalarAsync());
+        var decrementedLsn = await command.ExecuteScalarAsync();
+        return decrementedLsn != DBNull.Value ? (byte[]?)decrementedLsn : null;
     }
 
     public static async Task<byte[]?> IncrementLsn(SqlConnection connection, byte[] lsn)
@@ -82,7 +88,8 @@ internal static class CdcDatabase
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
         using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@lsn", lsn);
-        return (byte[]?)(await command.ExecuteScalarAsync());
+        var incrementedLsn = await command.ExecuteScalarAsync();
+        return incrementedLsn != DBNull.Value ? (byte[]?)incrementedLsn : null;
     }
 
     public static async Task<List<IReadOnlyDictionary<string, object>>> GetAllChanges(
