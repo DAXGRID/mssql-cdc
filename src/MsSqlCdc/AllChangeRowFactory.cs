@@ -16,7 +16,7 @@ internal static class AllChangeRowFactory
     /// <exception cref="Exception"></exception>
     public static AllChangeRow Create(IReadOnlyDictionary<string, object> fields, string captureInstance)
     {
-        if (fields.Where(x => IsRequiredField(x.Key)).Count() < 4)
+        if (GetRequiredFields(fields).Count() < 4)
             throw new ArgumentException($"The column fields does not contain all the default CDC column fields.");
 
         var startLsn = DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
@@ -39,6 +39,10 @@ internal static class AllChangeRowFactory
         fieldName == CdcFieldName.SeqVal ||
         fieldName == CdcFieldName.Operation ||
         fieldName == CdcFieldName.UpdateMask;
+
+    private static IEnumerable<KeyValuePair<string, object>> GetRequiredFields(
+        IReadOnlyDictionary<string, object> fields)
+        => fields.Where(x => IsRequiredField(x.Key));
 
     private static Dictionary<string, object> GetNotDefaultFields(IReadOnlyDictionary<string, object> fields)
         => fields.Where(x => !IsRequiredField(x.Key)).ToDictionary(x => x.Key, x => x.Value);
