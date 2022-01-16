@@ -252,7 +252,9 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    netChange.UpdateMask.Should().BeNull(); // TODO take a look at this
+                    // UpdateMask will be non empty
+                    // if table cleaned after insert and the row is updated again thereafter.
+                    netChange.UpdateMask.Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.Insert);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
