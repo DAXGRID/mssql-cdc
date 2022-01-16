@@ -267,7 +267,7 @@ public static class Cdc
     /// <returns>
     /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </returns>
-    public static async Task<IReadOnlyCollection<AllChangeRow>> GetNetChanges(
+    public static async Task<IReadOnlyCollection<NetChangeRow>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         BigInteger fromLsn,
@@ -279,7 +279,7 @@ public static class Cdc
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
-        return cdcColumns.Select(x => AllChangeRowFactory.Create(x, captureInstance)).ToList();
+        return cdcColumns.Select(x => NetChangeRowFactory.Create(x, captureInstance)).ToList();
     }
 
     /// <summary>

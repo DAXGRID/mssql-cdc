@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MsSqlCdc;
 
-internal static class AllChangeRowFactory
+internal static class NetChangeRowFactory
 {
     /// <summary>
     /// Converts a a collection of columns represented as Dictionary<string, object> to ChangeData representation.
@@ -14,42 +14,41 @@ internal static class AllChangeRowFactory
     /// <param name="captureInstance">The capture instance.</param>
     /// <returns>Returns the CDC column as a ChangeData record.</returns>
     /// <exception cref="Exception"></exception>
-    public static AllChangeRow Create(IReadOnlyDictionary<string, object> fields, string captureInstance)
+    public static NetChangeRow Create(
+        IReadOnlyDictionary<string, object> fields,
+        string captureInstance)
     {
-        if (fields.Where(x => IsRequiredField(x.Key)).Count() < 4)
+        if (fields.Where(x => IsRequiredField(x.Key)).Count() < 3)
             throw new ArgumentException($"The column fields does not contain all the default CDC column fields.");
 
         var startLsn = DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
-        var seqVal = DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.SeqVal]);
         var operation = ConvertOperation((int)fields[CdcFieldName.Operation]);
         var updateMask = Encoding.UTF8.GetString((byte[])fields[CdcFieldName.UpdateMask]);
-        var notDefaultFields = GetNotDefaultFields(fields);
+        var optionalFields = GetOptionalFields(fields);
 
-        return new AllChangeRow(
+        return new NetChangeRow(
             startLsn,
-            seqVal,
             operation,
             updateMask,
             captureInstance,
-            notDefaultFields);
+            optionalFields);
     }
 
     private static bool IsRequiredField(string fieldName) =>
         fieldName == CdcFieldName.StartLsn ||
-        fieldName == CdcFieldName.SeqVal ||
         fieldName == CdcFieldName.Operation ||
         fieldName == CdcFieldName.UpdateMask;
 
-    private static Dictionary<string, object> GetNotDefaultFields(IReadOnlyDictionary<string, object> fields)
+    private static Dictionary<string, object> GetOptionalFields(IReadOnlyDictionary<string, object> fields)
         => fields.Where(x => !IsRequiredField(x.Key)).ToDictionary(x => x.Key, x => x.Value);
 
-    private static AllChangeOperation ConvertOperation(int representation)
+    private static NetChangeOperation ConvertOperation(int representation)
         => representation switch
         {
-            1 => AllChangeOperation.Delete,
-            2 => AllChangeOperation.Insert,
-            3 => AllChangeOperation.BeforeUpdate,
-            4 => AllChangeOperation.AfterUpdate,
+            1 => NetChangeOperation.Delete,
+            2 => NetChangeOperation.Insert,
+            4 => NetChangeOperation.Update,
+            5 => NetChangeOperation.InsertOrUpdate,
             _ => throw new ArgumentException($"Not valid representation value '{representation}'")
         };
 }

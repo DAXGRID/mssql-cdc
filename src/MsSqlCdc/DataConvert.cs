@@ -1,68 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace MsSqlCdc;
 
 internal static class DataConvert
 {
-    /// <summary>
-    /// Converts a a collection of columns represented as Tuple<string, object> to ChangeData<dynamic> representation.
-    /// </summary>
-    /// <param name="columnFields">List of tuples with Item1 being the name column and Item2 being the column value</param>
-    /// <param name="captureInstance">The tablename of the column.</param>
-    /// <returns>Returns the CDC column as a ChangeData record.</returns>
-    /// <exception cref="Exception"></exception>
-    private static NetChangeRow CreateNetChangeRow(
-        IReadOnlyDictionary<string, object> columnFields,
-        string captureInstance)
-    {
-        bool isDefaultCdcField(string fieldName) =>
-                fieldName == CdcFieldName.StartLsn ||
-                fieldName == CdcFieldName.Operation ||
-                fieldName == CdcFieldName.UpdateMask;
-
-        if (columnFields.Where(x => isDefaultCdcField(x.Key)).Count() < 3)
-        {
-            throw new ArgumentException(
-                        $"The column fields does not contain all the default CDC column fields.");
-        }
-
-        var nonDefaultCdcFields = columnFields
-            .Where(x => !isDefaultCdcField(x.Key))
-            .ToDictionary(x => x.Key, x => x.Value);
-
-        var startLsn = ConvertBinaryLsn((byte[])columnFields[CdcFieldName.StartLsn]);
-        var operation = ConvertNetChangeOperation((int)columnFields[CdcFieldName.Operation]);
-        var updateMask = Encoding.UTF8.GetString((byte[])columnFields[CdcFieldName.UpdateMask]);
-
-        return new NetChangeRow(
-            startLsn,
-            operation,
-            updateMask,
-            captureInstance,
-            nonDefaultCdcFields);
-    }
-
-    /// <summary>
-    /// Converts the number representation to an Enum representation of the value.
-    /// </summary>
-    /// <param name="representation">The number representation of the Operation.</param>
-    /// <returns>Enum representation of the number representation.</returns>
-    /// <exception cref="ArgumentException"></exception>
-    public static NetChangeOperation ConvertNetChangeOperation(int representation)
-        => representation switch
-        {
-            1 => NetChangeOperation.Delete,
-            2 => NetChangeOperation.Insert,
-            4 => NetChangeOperation.Update,
-            5 => NetChangeOperation.InsertOrUpdate,
-            _ => throw new ArgumentException($"Not valid representation value '{representation}'")
-        };
-
-
     /// <summary>
     /// Converts RelationOperator enum to a string representation to be used in MS-SQL.
     /// </summary>

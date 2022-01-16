@@ -8,27 +8,25 @@ using System.Linq;
 
 namespace MsSqlCdc.Tests;
 
-public class AllChangeRowFactoryTests
+public class NetChangeRowFactoryTests
 {
-    public static IEnumerable<object[]> AllChangesFieldsData()
+    public static IEnumerable<object[]> NetChangesFieldData()
     {
         yield return new object[]
         {
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.AfterUpdate},
+                {"__$operation", (int)NetChangeOperation.Update},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 10},
                 {"Name", "Rune"},
                 {"Salary", 20000.00},
             },
             "dbo_Employee",
-            new AllChangeRow(
+            new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.AfterUpdate,
+                NetChangeOperation.Update,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object> {
@@ -43,17 +41,15 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.BeforeUpdate},
+                {"__$operation", (int)NetChangeOperation.Insert},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 1},
                 {"Name", "Simon"},
             },
             "dbo_Employee",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.BeforeUpdate,
+                NetChangeOperation.Insert,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object> {
@@ -67,17 +63,15 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Delete},
+                {"__$operation", (int)NetChangeOperation.Delete},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 0},
                 {"Name", "Jesper"},
             },
             "dbo_Employee",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Delete,
+                NetChangeOperation.Delete,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object>{
@@ -91,16 +85,14 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", (int)NetChangeOperation.Insert},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 10},
             },
             "dbo_Animal",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Insert,
+                NetChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -113,15 +105,13 @@ public class AllChangeRowFactoryTests
              new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", (int)NetChangeOperation.InsertOrUpdate},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
             },
             "dbo_Animal",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Insert,
+                NetChangeOperation.InsertOrUpdate,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -134,14 +124,12 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
-                {"__$operation", (int)AllChangeOperation.Insert},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
+                {"__$operation", (int)NetChangeOperation.Insert},
             },
             "dbo_Animal",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Insert,
+                NetChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -153,15 +141,13 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", (int)NetChangeOperation.InsertOrUpdate},
             },
             "dbo_Animal",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Insert,
+                NetChangeOperation.InsertOrUpdate,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -173,17 +159,15 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"Id", 0},
-                {"__$operation", (int)AllChangeOperation.Delete},
+                {"__$operation", (int)NetChangeOperation.Delete},
                 {"Name", "Jesper"},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
-                {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
             },
             "dbo_Employee",
-             new AllChangeRow(
+             new NetChangeRow(
                 25000L,
-                25002L,
-                AllChangeOperation.Delete,
+                NetChangeOperation.Delete,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object>{
@@ -193,7 +177,7 @@ public class AllChangeRowFactoryTests
         };
     }
 
-    public static IEnumerable<object[]> CdcDefaultFieldsInvalidData()
+    public static IEnumerable<object[]> InvalidNetChangesFieldData()
     {
         yield return new object[]
         {
@@ -259,24 +243,24 @@ public class AllChangeRowFactoryTests
 
     [Theory]
     [Trait("Category", "Unit")]
-    [MemberData(nameof(AllChangesFieldsData))]
+    [MemberData(nameof(NetChangesFieldData))]
     public void Conversion_cdc_column_to_change_row(
         Dictionary<string, object> columnFields,
         string captureInstance,
-        AllChangeRow expected)
+        NetChangeRow expected)
     {
-        var result = AllChangeRowFactory.Create(columnFields, captureInstance);
+        var result = NetChangeRowFactory.Create(columnFields, captureInstance);
         result.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
     [Trait("Category", "Unit")]
-    [MemberData(nameof(CdcDefaultFieldsInvalidData))]
+    [MemberData(nameof(InvalidNetChangesFieldData))]
     public void Conversion_cdc_column_without_default_fields_is_invalid(
         Dictionary<string, object> columnFields,
         string captureInstance)
     {
-        Invoking(() => AllChangeRowFactory.Create(columnFields, captureInstance))
+        Invoking(() => NetChangeRowFactory.Create(columnFields, captureInstance))
             .Should()
             .Throw<ArgumentException>()
             .WithMessage($"The column fields does not contain all the default CDC column fields.");
