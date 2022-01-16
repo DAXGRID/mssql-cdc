@@ -267,7 +267,7 @@ public static class Cdc
     /// <returns>
     /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </returns>
-    public static async Task<IReadOnlyCollection<ChangeRow>> GetNetChanges(
+    public static async Task<IReadOnlyCollection<AllChangeRow>> GetNetChanges(
         SqlConnection connection,
         string captureInstance,
         BigInteger fromLsn,
@@ -279,7 +279,7 @@ public static class Cdc
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
-        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
+        return cdcColumns.Select(x => DataConvert.CreateAllChangeRow(x, captureInstance)).ToList();
     }
 
     /// <summary>
@@ -294,7 +294,7 @@ public static class Cdc
     /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
     /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
     /// </returns>
-    public static async Task<IReadOnlyCollection<ChangeRow>> GetAllChanges(
+    public static async Task<IReadOnlyCollection<AllChangeRow>> GetAllChanges(
         SqlConnection connection,
         string captureInstance,
         BigInteger beginLsn,
@@ -306,6 +306,6 @@ public static class Cdc
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetAllChanges(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
-        return cdcColumns.Select(x => DataConvert.ConvertCdcColumn(x, captureInstance)).ToList();
+        return cdcColumns.Select(x => DataConvert.CreateAllChangeRow(x, captureInstance)).ToList();
     }
 }

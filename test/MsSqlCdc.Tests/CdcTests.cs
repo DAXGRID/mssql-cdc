@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.Data.SqlClient;
 using Xunit;
 
@@ -112,14 +110,14 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
-        var netChanges = await Cdc.GetAllChanges(
+        var allChanges = await Cdc.GetAllChanges(
             connection,
             captureInstance,
             minLsn,
             maxLsn,
             AllChangesRowFilterOption.All);
 
-        netChanges
+        allChanges
             .Should()
             .HaveCount(2).And
             .SatisfyRespectively(
@@ -128,7 +126,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     insert.CaptureInstance.Should().Be(captureInstance);
                     insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
-                    insert.Operation.Should().Be(Operation.Insert);
+                    insert.Operation.Should().Be(AllChangeOperation.Insert);
                     insert.Fields["id"].Should().NotBeNull();
                     insert.Fields["first_name"].Should().Be("Rune");
                     insert.Fields["last_name"].Should().Be("Nielsen");
@@ -138,7 +136,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     afterUpdate.CaptureInstance.Should().Be(captureInstance);
                     afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
-                    afterUpdate.Operation.Should().Be(Operation.AfterUpdate);
+                    afterUpdate.Operation.Should().Be(AllChangeOperation.AfterUpdate);
                     afterUpdate.Fields["id"].Should().NotBeNull();
                     afterUpdate.Fields["first_name"].Should().Be("Rune");
                     afterUpdate.Fields["last_name"].Should().Be("Jensen");
@@ -155,14 +153,14 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
-        var netChanges = (await Cdc.GetAllChanges(
+        var allChanges = await Cdc.GetAllChanges(
             connection,
             captureInstance,
             minLsn,
             maxLsn,
-            AllChangesRowFilterOption.AllUpdateOld)).ToArray();
+            AllChangesRowFilterOption.AllUpdateOld);
 
-        netChanges
+        allChanges
             .Should()
             .HaveCount(3).And
             .SatisfyRespectively(
@@ -171,7 +169,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     insert.CaptureInstance.Should().Be(captureInstance);
                     insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
-                    insert.Operation.Should().Be(Operation.Insert);
+                    insert.Operation.Should().Be(AllChangeOperation.Insert);
                     insert.Fields["id"].Should().NotBeNull();
                     insert.Fields["first_name"].Should().Be("Rune");
                     insert.Fields["last_name"].Should().Be("Nielsen");
@@ -181,7 +179,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     beforeUpdate.CaptureInstance.Should().Be(captureInstance);
                     beforeUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     beforeUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
-                    beforeUpdate.Operation.Should().Be(Operation.BeforeUpdate);
+                    beforeUpdate.Operation.Should().Be(AllChangeOperation.BeforeUpdate);
                     beforeUpdate.Fields["id"].Should().NotBeNull();
                     beforeUpdate.Fields["first_name"].Should().Be("Rune");
                     beforeUpdate.Fields["last_name"].Should().Be("Nielsen");
@@ -191,32 +189,37 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     afterUpdate.CaptureInstance.Should().Be(captureInstance);
                     afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
-                    afterUpdate.Operation.Should().Be(Operation.AfterUpdate);
+                    afterUpdate.Operation.Should().Be(AllChangeOperation.AfterUpdate);
                     afterUpdate.Fields["id"].Should().NotBeNull();
                     afterUpdate.Fields["first_name"].Should().Be("Rune");
                     afterUpdate.Fields["last_name"].Should().Be("Jensen");
                 });
     }
 
+    // [Fact]
+    // [Trait("Category", "Integration")]
+    // public async Task Get_net_changes()
+    // {
+    //     var captureInstance = "dbo_Employee";
+
+    //     using var connection = await CreateOpenSqlConnection();
+    //     var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+    //     var maxLsn = await Cdc.GetMaxLsn(connection);
+
+    //     var netChanges = await Cdc.GetNetChanges(
+    //         connection,
+    //         "dbo_Employee",
+    //         minLsn,
+    //         maxLsn,
+    //         NetChangesRowFilterOption.All);
+
+    //     netChanges.Should().HaveCount(2);
+    // }
+
     private async Task<SqlConnection> CreateOpenSqlConnection()
     {
         var connection = new SqlConnection(_databaseFixture.ConnectionString);
         await connection.OpenAsync();
         return connection;
-    }
-
-    private async Task InsertEmployee(Guid id, string firstName, string lastName)
-    {
-        using var connection = await CreateOpenSqlConnection();
-        var sql = @"
-            INSERT INTO [dbo].[employee] ([id], [first_name], [last_name])
-            VALUES(@id, @first_name, @last_name)";
-
-        using var cmd = new SqlCommand(sql, connection);
-        cmd.Parameters.AddWithValue("@id", id);
-        cmd.Parameters.AddWithValue("@first_name", firstName);
-        cmd.Parameters.AddWithValue("@last_name", lastName);
-
-        await cmd.ExecuteNonQueryAsync();
     }
 }

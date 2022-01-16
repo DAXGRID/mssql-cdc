@@ -18,17 +18,17 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.AfterUpdate},
+                {"__$operation", (int)AllChangeOperation.AfterUpdate},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 10},
                 {"Name", "Rune"},
                 {"Salary", 20000.00},
             },
             "dbo_Employee",
-            new ChangeRow(
+            new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.AfterUpdate,
+                AllChangeOperation.AfterUpdate,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object> {
@@ -44,16 +44,16 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.BeforeUpdate},
+                {"__$operation", (int)AllChangeOperation.BeforeUpdate},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 1},
                 {"Name", "Simon"},
             },
             "dbo_Employee",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.BeforeUpdate,
+                AllChangeOperation.BeforeUpdate,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object> {
@@ -68,16 +68,16 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.Delete},
+                {"__$operation", (int)AllChangeOperation.Delete},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 0},
                 {"Name", "Jesper"},
             },
             "dbo_Employee",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Delete,
+                AllChangeOperation.Delete,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object>{
@@ -92,15 +92,15 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.Insert},
+                {"__$operation", (int)AllChangeOperation.Insert},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"Id", 10},
             },
             "dbo_Animal",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Insert,
+                AllChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -114,14 +114,14 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.Insert},
+                {"__$operation", (int)AllChangeOperation.Insert},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
             },
             "dbo_Animal",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Insert,
+                AllChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -134,14 +134,14 @@ public class DataConverTest
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
-                {"__$operation", (int)Operation.Insert},
+                {"__$operation", (int)AllChangeOperation.Insert},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
             },
             "dbo_Animal",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Insert,
+                AllChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -155,13 +155,13 @@ public class DataConverTest
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$operation", (int)Operation.Insert},
+                {"__$operation", (int)AllChangeOperation.Insert},
             },
             "dbo_Animal",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Insert,
+                AllChangeOperation.Insert,
                 "MASK",
                 "dbo_Animal",
                 new Dictionary<string, object>{
@@ -173,17 +173,17 @@ public class DataConverTest
             new Dictionary<string, object>
             {
                 {"Id", 0},
-                {"__$operation", (int)Operation.Delete},
+                {"__$operation", (int)AllChangeOperation.Delete},
                 {"Name", "Jesper"},
                 {"__$update_mask", Encoding.ASCII.GetBytes("MASK")},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
             },
             "dbo_Employee",
-             new ChangeRow(
+             new AllChangeRow(
                 25000L,
                 25002L,
-                Operation.Delete,
+                AllChangeOperation.Delete,
                 "MASK",
                 "dbo_Employee",
                 new Dictionary<string, object>{
@@ -262,9 +262,9 @@ public class DataConverTest
     public void Conversion_cdc_column_to_change_row(
         Dictionary<string, object> columnFields,
         string captureInstance,
-        ChangeRow expected)
+        AllChangeRow expected)
     {
-        var result = DataConvert.ConvertCdcColumn(columnFields, captureInstance);
+        var result = DataConvert.CreateAllChangeRow(columnFields, captureInstance);
         result.Should().BeEquivalentTo(expected);
     }
 
@@ -274,18 +274,18 @@ public class DataConverTest
         Dictionary<string, object> columnFields,
         string captureInstance)
     {
-        Invoking(() => DataConvert.ConvertCdcColumn(columnFields, captureInstance))
+        Invoking(() => DataConvert.CreateAllChangeRow(columnFields, captureInstance))
             .Should()
             .Throw<ArgumentException>()
             .WithMessage($"The column fields does not contain all the default CDC column fields.");
     }
 
     [Theory]
-    [InlineData(1, Operation.Delete)]
-    [InlineData(2, Operation.Insert)]
-    [InlineData(3, Operation.BeforeUpdate)]
-    [InlineData(4, Operation.AfterUpdate)]
-    public void Operation_valid_number_representation_should_be_converted(int input, Operation expected)
+    [InlineData(1, AllChangeOperation.Delete)]
+    [InlineData(2, AllChangeOperation.Insert)]
+    [InlineData(3, AllChangeOperation.BeforeUpdate)]
+    [InlineData(4, AllChangeOperation.AfterUpdate)]
+    public void Operation_valid_number_representation_should_be_converted(int input, AllChangeOperation expected)
     {
         var operation = DataConvert.ConvertOperation(input);
         operation.Should().Be(expected);

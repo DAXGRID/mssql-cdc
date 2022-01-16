@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MsSqlCdc;
 
-public enum Operation
+public enum AllChangeOperation
 {
     Delete = 1,
     Insert = 2,
@@ -12,7 +12,7 @@ public enum Operation
     AfterUpdate = 4
 }
 
-public record ChangeRow
+public record AllChangeRow
 {
     /// <summary>
     /// Commit LSN associated with the change that preserves the commit order of the change.
@@ -29,7 +29,7 @@ public record ChangeRow
     /// Identifies the data manipulation language (DML) operation needed
     /// to apply the row of change data to the target data source.
     /// </summary>
-    public Operation Operation { get; init; }
+    public AllChangeOperation Operation { get; init; }
 
     /// <summary>
     /// A bit mask with a bit corresponding to each captured column identified for the capture instance.
@@ -48,10 +48,10 @@ public record ChangeRow
     /// </summary>
     public IReadOnlyDictionary<string, object> Fields { get; init; }
 
-    public ChangeRow(
+    public AllChangeRow(
         BigInteger startLineSequenceNumber,
         BigInteger sequenceValue,
-        Operation operation,
+        AllChangeOperation operation,
         string updateMask,
         string captureInstance,
         IReadOnlyDictionary<string, object> fields)
