@@ -22,7 +22,7 @@ public record NetChangeRow
     public BigInteger StartLineSequenceNumber { get; init; }
 
     /// <summary>
-    ///Identifies the data manipulation language (DML) operation needed to apply the row of
+    /// Identifies the data manipulation language (DML) operation needed to apply the row of
     /// change data to the target data source.
     /// If the value of the row_filter_option parameter is all or all with mask,
     /// the value in this column can be one of the following values:
