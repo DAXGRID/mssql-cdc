@@ -90,6 +90,7 @@ public static class Cdc
     {
         var hasColumnChanged = await CdcDatabase.HasColumnChanged(
             connection, captureInstance, columnName, updateMask).ConfigureAwait(false);
+
         return hasColumnChanged ?? throw new CdcException(
             @$"No returned value from 'HasColumnChanged'
                using values {nameof(captureInstance)}: '{captureInstance}',
