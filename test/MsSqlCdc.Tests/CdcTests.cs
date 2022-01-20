@@ -2,7 +2,6 @@ using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -10,13 +9,6 @@ namespace MsSqlCdc.Tests;
 
 public class CdcTests : IClassFixture<DatabaseFixture>
 {
-    private readonly DatabaseFixture _databaseFixture;
-
-    public CdcTests(DatabaseFixture databaseFixture)
-    {
-        _databaseFixture = databaseFixture;
-    }
-
     [Fact]
     [Trait("Category", "Integration")]
     public async Task Get_min_lsn()
@@ -26,7 +18,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
 
-        minLsn.Should().NotBe(default(BigInteger));
+        minLsn.Should().NotBe(default);
     }
 
     [Fact]
@@ -37,7 +29,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var maxLsn = await Cdc.GetMaxLsn(connection);
 
-        maxLsn.Should().NotBe(default(BigInteger));
+        maxLsn.Should().NotBe(default);
     }
 
     [Fact]
@@ -52,7 +44,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         previousLsn.Should()
             .BeLessThan(maxLsn).And
-            .NotBe(default(BigInteger));
+            .NotBe(default);
     }
 
     [Fact]
@@ -67,7 +59,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         previousLsn.Should()
             .BeGreaterThan(maxLsn).And
-            .BeGreaterThan(default(BigInteger));
+            .BeGreaterThan(default);
     }
 
     [Theory]
@@ -83,7 +75,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var lsn = await Cdc.MapTimeToLsn(connection, now, relationalOperator);
 
-        lsn.Should().NotBe(default(BigInteger));
+        lsn.Should().NotBe(default);
     }
 
     [Fact]
@@ -97,7 +89,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var time = await Cdc.MapLsnToTime(connection, maxLsn);
 
         time.ToUniversalTime().Should()
-            .NotBe(default(DateTime)).And
+            .NotBe(default).And
             .BeBefore(DateTime.UtcNow);
     }
 
@@ -125,8 +117,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 insert =>
                 {
                     insert.CaptureInstance.Should().Be(captureInstance);
-                    insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+                    insert.StartLineSequenceNumber.Should().BeGreaterThan(default);
+                    insert.SequenceValue.Should().BeGreaterThan(default);
                     insert.Operation.Should().Be(AllChangeOperation.Insert);
                     insert.Fields["id"].Should().NotBeNull();
                     insert.Fields["first_name"].Should().Be("Rune");
@@ -135,8 +127,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 afterUpdate =>
                 {
                     afterUpdate.CaptureInstance.Should().Be(captureInstance);
-                    afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+                    afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default);
+                    afterUpdate.SequenceValue.Should().BeGreaterThan(default);
                     afterUpdate.Operation.Should().Be(AllChangeOperation.AfterUpdate);
                     afterUpdate.Fields["id"].Should().NotBeNull();
                     afterUpdate.Fields["first_name"].Should().Be("Rune");
@@ -168,8 +160,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 insert =>
                 {
                     insert.CaptureInstance.Should().Be(captureInstance);
-                    insert.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    insert.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+                    insert.StartLineSequenceNumber.Should().BeGreaterThan(default);
+                    insert.SequenceValue.Should().BeGreaterThan(default);
                     insert.Operation.Should().Be(AllChangeOperation.Insert);
                     insert.Fields["id"].Should().NotBeNull();
                     insert.Fields["first_name"].Should().Be("Rune");
@@ -178,8 +170,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 beforeUpdate =>
                 {
                     beforeUpdate.CaptureInstance.Should().Be(captureInstance);
-                    beforeUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    beforeUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+                    beforeUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default);
+                    beforeUpdate.SequenceValue.Should().BeGreaterThan(default);
                     beforeUpdate.Operation.Should().Be(AllChangeOperation.BeforeUpdate);
                     beforeUpdate.Fields["id"].Should().NotBeNull();
                     beforeUpdate.Fields["first_name"].Should().Be("Rune");
@@ -188,8 +180,8 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 afterUpdate =>
                 {
                     afterUpdate.CaptureInstance.Should().Be(captureInstance);
-                    afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    afterUpdate.SequenceValue.Should().BeGreaterThan(default(BigInteger));
+                    afterUpdate.StartLineSequenceNumber.Should().BeGreaterThan(default);
+                    afterUpdate.SequenceValue.Should().BeGreaterThan(default);
                     afterUpdate.Operation.Should().Be(AllChangeOperation.AfterUpdate);
                     afterUpdate.Fields["id"].Should().NotBeNull();
                     afterUpdate.Fields["first_name"].Should().Be("Rune");
@@ -220,7 +212,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 netChange =>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
-                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default);
                     netChange.GetUpdateMask().Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.Insert);
                     netChange.Fields["first_name"].Should().Be("Rune");
@@ -251,7 +243,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 netChange =>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
-                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default);
                     // UpdateMask will be non empty
                     // if table cleaned after insert and the row is updated again thereafter.
                     netChange.GetUpdateMask().Should().BeNull();
@@ -284,7 +276,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 netChange =>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
-                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
+                    netChange.StartLineSequenceNumber.Should().BeGreaterThan(default);
                     netChange.GetUpdateMask().Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.InsertOrUpdate);
                     netChange.Fields["first_name"].Should().Be("Rune");
