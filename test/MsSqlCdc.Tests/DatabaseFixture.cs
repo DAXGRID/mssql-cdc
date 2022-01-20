@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace MsSqlCdc.Tests;
 
-public class DatabaseFixture
+internal class DatabaseFixture
 {
     private const string MasterDatabaseName = "master";
     private const string TestDatabaseName = "mssql_cdc_test";
@@ -53,20 +53,18 @@ public class DatabaseFixture
             ? filePath
             : Path.GetRelativePath(Directory.GetCurrentDirectory(), filePath);
 
-        if (!File.Exists(absolutePath))
-            throw new ArgumentException($"Could not find file at path: {absolutePath}");
-
-        return absolutePath;
+        return File.Exists(absolutePath)
+            ? absolutePath
+            : throw new ArgumentException($"Could not find file at path: {absolutePath}");
     }
 
     private static string CreateConnectionString(string initialCatalog)
-    {
-        var builder = new SqlConnectionStringBuilder();
-        builder.DataSource = "localhost";
-        builder.UserID = "sa";
-        builder.Password = "myAwesomePassword1";
-        builder.InitialCatalog = initialCatalog;
-        builder.Encrypt = false;
-        return builder.ConnectionString;
-    }
+        => new SqlConnectionStringBuilder
+        {
+            DataSource = "localhost",
+            UserID = "sa",
+            Password = "myAwesomePassword1",
+            InitialCatalog = initialCatalog,
+            Encrypt = false
+        }.ConnectionString;
 }

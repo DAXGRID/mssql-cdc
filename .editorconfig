@@ -1,4 +1,4 @@
-[*.{cs}]
+[*.cs]
 dotnet_analyzer_diagnostic.severity = error
 
 # IDE0007 and IDE0008 'var' preferences
@@ -20,3 +20,7 @@ dotnet_diagnostic.CA1707.severity = silent
 
 # CA1014: Mark assemblies with CLSCompliantAttribute
 dotnet_diagnostic.CA1014.severity = none
+
+[test/**.cs]
+dotnet_diagnostic.IDE0058.severity = silent
+dotnet_diagnostic.CA2007.severity = silent

@@ -3,7 +3,7 @@ using Xunit;
 
 namespace MsSqlCdc.Tests;
 
-public class DataConverTest
+public class DataConverTests
 {
     [Theory]
     [InlineData(RelationalOperator.LargestLessThan, "largest less than")]
