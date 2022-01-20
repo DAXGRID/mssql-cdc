@@ -22,5 +22,8 @@ dotnet_diagnostic.CA1707.severity = silent
 dotnet_diagnostic.CA1014.severity = none
 
 [test/**.cs]
+# IDE0058 Remove unnecessary expression value
 dotnet_diagnostic.IDE0058.severity = silent
+
+# CA2007: Do not directly await a Task
 dotnet_diagnostic.CA2007.severity = silent
