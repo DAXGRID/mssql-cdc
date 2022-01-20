@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using static FluentAssertions.FluentActions;
-using Xunit;
 using FluentAssertions;
+using System;
+using static FluentAssertions.FluentActions;
+using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 
 namespace MsSqlCdc.Tests;
 
