@@ -6,14 +6,16 @@ namespace MsSqlCdc;
 
 public enum NetChangeOperation
 {
-    Delete = 1,
-    Insert = 2,
-    Update = 4,
-    InsertOrUpdate = 5
+    Delete,
+    Insert,
+    Update,
+    InsertOrUpdate
 }
 
 public record NetChangeRow
 {
+    private readonly byte[]? _updateMask;
+
     /// <summary>
     /// All changes committed in the same transaction share the same commit LSN.
     /// For example, if an update operation on the source table modifies two columns in two rows,
@@ -41,7 +43,7 @@ public record NetChangeRow
     /// This value has all defined bits set to 1 when __$operation = 1 or 2. When __$operation = 3 or 4,
     /// only those bits corresponding to columns that changed are set to 1.
     /// </summary>
-    public byte[]? UpdateMask { get; init; }
+    public byte[]? GetUpdateMask() => (byte[]?)_updateMask?.Clone();
 
     /// <summary>
     /// The name of the capture instance associated with the change.
@@ -61,13 +63,13 @@ public record NetChangeRow
         IReadOnlyDictionary<string, object> fields)
     {
         if (fields is null)
-            throw new ArgumentNullException($"{nameof(fields)} cannot be null.");
+            throw new ArgumentNullException(nameof(fields), "Cannot be null.");
         if (string.IsNullOrWhiteSpace(captureInstance))
-            throw new ArgumentNullException($"{nameof(captureInstance)} cannot be null, empty or whitespace.");
+            throw new ArgumentNullException(nameof(captureInstance), "Cannot be null, empty or whitespace.");
 
         StartLineSequenceNumber = startLineSequenceNumber;
         Operation = operation;
-        UpdateMask = updateMask;
+        _updateMask = updateMask;
         CaptureInstance = captureInstance;
         Fields = fields;
     }

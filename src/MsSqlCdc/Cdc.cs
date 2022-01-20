@@ -88,13 +88,13 @@ public static class Cdc
         string columnName,
         byte[] updateMask)
     {
-        var hasColumnChanged = await CdcDatabase.HasColumnChanged(connection, captureInstance, columnName, updateMask);
-        if (!hasColumnChanged.HasValue)
-            throw new Exception(@$"No returned value from 'HasColumnChanged'
-                                   using values {nameof(captureInstance)}: '{captureInstance}',
-                                   {nameof(columnName)}: '{columnName}',
-                                   {nameof(updateMask)}: '{updateMask}'.");
-        return hasColumnChanged.Value;
+        var hasColumnChanged = await CdcDatabase.HasColumnChanged(
+            connection, captureInstance, columnName, updateMask).ConfigureAwait(false);
+        return hasColumnChanged ?? throw new CdcException(
+            @$"No returned value from 'HasColumnChanged'
+               using values {nameof(captureInstance)}: '{captureInstance}',
+               {nameof(columnName)}: '{columnName}',
+               {nameof(updateMask)}: '{updateMask}'.");
     }
 
     /// <summary>
@@ -116,8 +116,10 @@ public static class Cdc
         string captureInstance,
         string columnName)
     {
-        var columnOrdinal = await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName);
-        return columnOrdinal.HasValue ? columnOrdinal.Value : -1;
+        var columnOrdinal = await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName)
+            .ConfigureAwait(false);
+
+        return columnOrdinal ?? -1;
     }
 
     /// <summary>
@@ -140,12 +142,14 @@ public static class Cdc
         RelationalOperator relationalOperator)
     {
         var convertedRelationOperator = DataConvert.ConvertRelationOperator(relationalOperator);
-        var lsnBytes = await CdcDatabase.MapTimeToLsn(connection, trackingTime, convertedRelationOperator);
-        if (lsnBytes is null)
-            throw new Exception(@$"Could not map time to lsn using values {nameof(trackingTime)}: '${trackingTime}'
-                                   and {nameof(relationalOperator)}: '{convertedRelationOperator}.
-                                   Response was empty.");
-        return DataConvert.ConvertBinaryLsn(lsnBytes);
+        var lsnBytes = await CdcDatabase.MapTimeToLsn(
+            connection, trackingTime, convertedRelationOperator).ConfigureAwait(false);
+
+        return lsnBytes is not null
+            ? DataConvert.ConvertBinaryLsn(lsnBytes)
+            : throw new CdcException(
+                @$"Could not map time to lsn using values {nameof(trackingTime)}: '${trackingTime}'
+                   and {nameof(relationalOperator)}: '{convertedRelationOperator}. Response was empty.");
     }
 
     /// <summary>
@@ -162,11 +166,9 @@ public static class Cdc
     public static async Task<DateTime> MapLsnToTime(SqlConnection connection, BigInteger lsn)
     {
         var binaryLsn = DataConvert.ConvertLsnBigEndian(lsn);
-        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, binaryLsn);
-        if (!lsnToTime.HasValue)
-            throw new Exception($"Could not convert LSN to time with LSN being '{lsn}'");
+        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, binaryLsn).ConfigureAwait(false);
 
-        return lsnToTime.Value;
+        return lsnToTime ?? throw new CdcException($"Could not convert LSN to time with LSN being '{lsn}'");
     }
 
     /// <summary>
@@ -178,11 +180,12 @@ public static class Cdc
     /// <returns>Return the low endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<BigInteger> GetMinLsn(SqlConnection connection, string captureInstance)
     {
-        var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance);
-        if (minLsnBytes is null)
-            throw new Exception(@$"Could get min LSN using values {nameof(captureInstance)}: '${captureInstance}'");
+        var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance).ConfigureAwait(false);
 
-        return DataConvert.ConvertBinaryLsn(minLsnBytes);
+        return minLsnBytes is not null
+            ? DataConvert.ConvertBinaryLsn(minLsnBytes)
+            : throw new CdcException(
+                @$"Could'nt get min LSN using values {nameof(captureInstance)}: '${captureInstance}'");
     }
 
     /// <summary>
@@ -194,11 +197,11 @@ public static class Cdc
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
     public static async Task<BigInteger> GetMaxLsn(SqlConnection connection)
     {
-        var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection);
-        if (maxLsnBytes is null)
-            throw new Exception($"Could not get max LSN.");
+        var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection).ConfigureAwait(false);
 
-        return DataConvert.ConvertBinaryLsn(maxLsnBytes);
+        return maxLsnBytes is not null
+            ? DataConvert.ConvertBinaryLsn(maxLsnBytes)
+            : throw new CdcException($"Could not get max LSN.");
     }
 
     /// <summary>
@@ -210,11 +213,11 @@ public static class Cdc
     public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, BigInteger lsn)
     {
         var binaryLsn = DataConvert.ConvertLsnBigEndian(lsn);
-        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, binaryLsn);
-        if (previousLsnBytes is null)
-            throw new Exception($"Could not get previous lsn on {nameof(lsn)}: '{lsn}'.");
+        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, binaryLsn).ConfigureAwait(false);
 
-        return DataConvert.ConvertBinaryLsn(previousLsnBytes);
+        return previousLsnBytes is not null
+            ? DataConvert.ConvertBinaryLsn(previousLsnBytes)
+            : throw new CdcException($"Could not get previous lsn on {nameof(lsn)}: '{lsn}'.");
     }
 
     /// <summary>
@@ -226,11 +229,11 @@ public static class Cdc
     public static async Task<BigInteger> GetNextLsn(SqlConnection connection, BigInteger lsn)
     {
         var lsnBinary = DataConvert.ConvertLsnBigEndian(lsn);
-        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsnBinary);
-        if (nextLsnBytes is null)
-            throw new Exception($"Could not get next lsn on {nameof(lsn)}: '{lsn}'.");
+        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsnBinary).ConfigureAwait(false);
 
-        return DataConvert.ConvertBinaryLsn(nextLsnBytes);
+        return nextLsnBytes is not null
+            ? DataConvert.ConvertBinaryLsn(nextLsnBytes)
+            : throw new CdcException($"Could not get next lsn on {nameof(lsn)}: '{lsn}'.");
     }
 
     /// <summary>
@@ -254,7 +257,8 @@ public static class Cdc
         var endLsnBinary = DataConvert.ConvertLsnBigEndian(toLsn);
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetNetChanges(
-            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
+            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption).ConfigureAwait(false);
+
         return cdcColumns.Select(x => NetChangeRowFactory.Create(x, captureInstance)).ToList();
     }
 
@@ -281,7 +285,8 @@ public static class Cdc
         var endLsnBinary = DataConvert.ConvertLsnBigEndian(endLsn);
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
         var cdcColumns = await CdcDatabase.GetAllChanges(
-            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption);
+            connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption).ConfigureAwait(false);
+
         return cdcColumns.Select(x => AllChangeRowFactory.Create(x, captureInstance)).ToList();
     }
 }

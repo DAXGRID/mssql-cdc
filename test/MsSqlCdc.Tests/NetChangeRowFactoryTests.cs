@@ -16,7 +16,7 @@ public class NetChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.Update},
+                {"__$operation", 4},
                 {"__$update_mask", new byte[128]},
                 {"Id", 10},
                 {"Name", "Rune"},
@@ -40,7 +40,7 @@ public class NetChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.Insert},
+                {"__$operation", 2},
                 {"__$update_mask", new byte[128]},
                 {"Id", 1},
                 {"Name", "Simon"},
@@ -62,7 +62,7 @@ public class NetChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.Delete},
+                {"__$operation", 1},
                 {"__$update_mask", new byte[128]},
                 {"Id", 0},
                 {"Name", "Jesper"},
@@ -84,7 +84,7 @@ public class NetChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.Insert},
+                {"__$operation", 2},
                 {"__$update_mask", new byte[128]},
                 {"Id", 10},
             },
@@ -104,7 +104,7 @@ public class NetChangeRowFactoryTests
              new Dictionary<string, object>
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.InsertOrUpdate},
+                {"__$operation", 5},
                 {"__$update_mask", new byte[128]},
             },
             "dbo_Animal",
@@ -123,7 +123,7 @@ public class NetChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
                 {"__$update_mask", new byte[128]},
-                {"__$operation", (int)NetChangeOperation.Insert},
+                {"__$operation", 2},
             },
             "dbo_Animal",
              new NetChangeRow(
@@ -141,7 +141,7 @@ public class NetChangeRowFactoryTests
             {
                 {"__$update_mask", new byte[128]},
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
-                {"__$operation", (int)NetChangeOperation.InsertOrUpdate},
+                {"__$operation", 5},
             },
             "dbo_Animal",
              new NetChangeRow(
@@ -158,7 +158,7 @@ public class NetChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"Id", 0},
-                {"__$operation", (int)NetChangeOperation.Delete},
+                {"__$operation", 1},
                 {"Name", "Jesper"},
                 {"__$update_mask", new byte[128]},
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
@@ -180,7 +180,7 @@ public class NetChangeRowFactoryTests
         {
             new Dictionary<string, object>
             {
-                {"__$operation", (int)NetChangeOperation.Delete},
+                {"__$operation", 1},
                 {"__$update_mask", DBNull.Value},
                 {"__$start_lsn", BitConverter.GetBytes(25000).Reverse().ToArray()},
                 {"Id", 0},
