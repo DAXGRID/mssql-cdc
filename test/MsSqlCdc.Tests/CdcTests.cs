@@ -1,9 +1,9 @@
+using FluentAssertions;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace MsSqlCdc.Tests;

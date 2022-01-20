@@ -1,7 +1,7 @@
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 
 namespace MsSqlCdc;
 

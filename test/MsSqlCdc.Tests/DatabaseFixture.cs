@@ -1,9 +1,9 @@
-using System;
-using System.IO;
-using System.Threading;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
+using System;
+using System.IO;
+using System.Threading;
 
 namespace MsSqlCdc.Tests;
 
