@@ -11,7 +11,7 @@ public class DatabaseFixture
 {
     private const string MasterDatabaseName = "master";
     private const string TestDatabaseName = "mssql_cdc_test";
-    public string ConnectionString => CreateConnectionString(TestDatabaseName);
+    public static string ConnectionString => CreateConnectionString(TestDatabaseName);
 
     public DatabaseFixture()
     {
@@ -23,7 +23,7 @@ public class DatabaseFixture
         Thread.Sleep(3000);
     }
 
-    private void SetupDatabase()
+    private static void SetupDatabase()
     {
         using var connection = new SqlConnection(CreateConnectionString(MasterDatabaseName));
         connection.Open();
@@ -32,7 +32,7 @@ public class DatabaseFixture
         server.ConnectionContext.ExecuteNonQuery(setupSql);
     }
 
-    private void DeleteDatabase()
+    private static void DeleteDatabase()
     {
         var deleteDatabaseSql = $@"
             IF DB_ID('{TestDatabaseName}') IS NOT NULL

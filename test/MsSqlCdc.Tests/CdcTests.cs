@@ -221,7 +221,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    netChange.UpdateMask.Should().BeNull();
+                    netChange.GetUpdateMask().Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.Insert);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
@@ -254,7 +254,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
                     // UpdateMask will be non empty
                     // if table cleaned after insert and the row is updated again thereafter.
-                    netChange.UpdateMask.Should().BeNull();
+                    netChange.GetUpdateMask().Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.Insert);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
@@ -285,7 +285,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                 {
                     netChange.CaptureInstance.Should().Be(captureInstance);
                     netChange.StartLineSequenceNumber.Should().BeGreaterThan(default(BigInteger));
-                    netChange.UpdateMask.Should().BeNull();
+                    netChange.GetUpdateMask().Should().BeNull();
                     netChange.Operation.Should().Be(NetChangeOperation.InsertOrUpdate);
                     netChange.Fields["first_name"].Should().Be("Rune");
                     netChange.Fields["last_name"].Should().Be("Jensen");
@@ -339,16 +339,16 @@ public class CdcTests : IClassFixture<DatabaseFixture>
                               maxLsn,
                               AllChangesRowFilterOption.AllUpdateOld);
 
-        var updateMask = changes.Last().UpdateMask;
+        var updateMask = changes.Last().GetUpdateMask();
 
         var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
 
         hasColumnChanged.Should().Be(expected);
     }
 
-    private async Task<SqlConnection> CreateOpenSqlConnection()
+    private static async Task<SqlConnection> CreateOpenSqlConnection()
     {
-        var connection = new SqlConnection(_databaseFixture.ConnectionString);
+        var connection = new SqlConnection(DatabaseFixture.ConnectionString);
         await connection.OpenAsync();
         return connection;
     }

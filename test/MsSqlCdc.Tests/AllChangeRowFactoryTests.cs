@@ -17,7 +17,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.AfterUpdate},
+                {"__$operation", 4},
                 {"__$update_mask", new byte[128]},
                 {"Id", 10},
                 {"Name", "Rune"},
@@ -43,7 +43,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.BeforeUpdate},
+                {"__$operation", 3},
                 {"__$update_mask", new byte[128]},
                 {"Id", 1},
                 {"Name", "Simon"},
@@ -67,7 +67,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Delete},
+                {"__$operation", 1},
                 {"__$update_mask", new byte[128]},
                 {"Id", 0},
                 {"Name", "Jesper"},
@@ -91,7 +91,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", 2},
                 {"__$update_mask", new byte[128]},
                 {"Id", 10},
             },
@@ -113,7 +113,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", 2},
                 {"__$update_mask", new byte[128]},
             },
             "dbo_Animal",
@@ -133,7 +133,7 @@ public class AllChangeRowFactoryTests
             {
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
                 {"__$update_mask", new byte[128]},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", 2},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
             },
             "dbo_Animal",
@@ -154,7 +154,7 @@ public class AllChangeRowFactoryTests
                 {"__$update_mask", new byte[128]},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},
                 {"__$start_lsn", BitConverter.GetBytes(25000L).Reverse().ToArray()},
-                {"__$operation", (int)AllChangeOperation.Insert},
+                {"__$operation", 2},
             },
             "dbo_Animal",
              new AllChangeRow(
@@ -172,7 +172,7 @@ public class AllChangeRowFactoryTests
             new Dictionary<string, object>
             {
                 {"Id", 0},
-                {"__$operation", (int)AllChangeOperation.Delete},
+                {"__$operation", 1},
                 {"Name", "Jesper"},
                 {"__$update_mask", new byte[128]},
                 {"__$seqval", BitConverter.GetBytes(25002L).Reverse().ToArray()},

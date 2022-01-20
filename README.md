@@ -125,7 +125,8 @@ var changes = await Cdc.GetAllChanges(
                       maxLsn,
                       AllChangesRowFilterOption.AllUpdateOld);
 
-var updateMask = changes.First().UpdateMask;
+// We just pick the first one here as an example.
+var updateMask = changes.First().GetUpdateMask();
 
 var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
 ```

@@ -16,17 +16,20 @@ internal static class AllChangeRowFactory
     /// <exception cref="Exception"></exception>
     public static AllChangeRow Create(IReadOnlyDictionary<string, object> fields, string captureInstance)
     {
-        if (GetRequiredFields(fields).Count() < 4)
-            throw new ArgumentException($"The column fields does not contain all the default CDC column fields.");
-
-        return new AllChangeRow(
-            GetStartLsn(fields),
-            GetSeqVal(fields),
-            GetOperation(fields),
-            GetUpdateMask(fields),
-            captureInstance,
-            GetAdditionalFields(fields));
+        return HasRequiredFields(fields)
+            ? new AllChangeRow(
+                GetStartLsn(fields),
+                GetSeqVal(fields),
+                GetOperation(fields),
+                GetUpdateMask(fields),
+                captureInstance,
+                GetAdditionalFields(fields))
+            : throw new ArgumentException($"The column fields does not contain all the default CDC column fields.");
     }
+
+    private static bool HasRequiredFields(IReadOnlyDictionary<string, object> fields)
+        => GetRequiredFields(fields).Count() >= 4;
+
 
     private static byte[] GetUpdateMask(IReadOnlyDictionary<string, object> fields) =>
         (byte[])fields[CdcFieldName.UpdateMask];
@@ -38,10 +41,11 @@ internal static class AllChangeRowFactory
         DataConvert.ConvertBinaryLsn((byte[])fields[CdcFieldName.StartLsn]);
 
     private static bool IsRequiredField(string fieldName) =>
-        fieldName == CdcFieldName.StartLsn ||
-        fieldName == CdcFieldName.SeqVal ||
-        fieldName == CdcFieldName.Operation ||
-        fieldName == CdcFieldName.UpdateMask;
+        fieldName is
+        CdcFieldName.StartLsn or
+        CdcFieldName.SeqVal or
+        CdcFieldName.Operation or
+        CdcFieldName.UpdateMask;
 
     private static IEnumerable<KeyValuePair<string, object>> GetRequiredFields(
         IReadOnlyDictionary<string, object> fields) => fields.Where(x => IsRequiredField(x.Key));
