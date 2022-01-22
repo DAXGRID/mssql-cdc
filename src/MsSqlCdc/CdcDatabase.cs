@@ -148,9 +148,8 @@ internal static class CdcDatabase
             filterOption).ConfigureAwait(false);
     }
     [System.Diagnostics.CodeAnalysis.SuppressMessage
-    ("Security",
-     "CA2100:Review SQL queries for security vulnerabilities",
-     Justification = "There is no user input, but we also unquote to make sure.")]
+    ("Security", "CA2100:Review SQL queries for security vulnerabilities",
+     Justification = "No user input.")]
     private static async Task<List<IReadOnlyDictionary<string, object>>> GetChanges(
         SqlConnection connection,
         string cdcFunction,
@@ -159,10 +158,7 @@ internal static class CdcDatabase
         byte[] endLsn,
         string filterOption)
     {
-        // We have to do this here, since we cannot pass the function as command parameter.
-        using var builder = new SqlCommandBuilder();
-        var sql = builder.UnquoteIdentifier(
-            $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)");
+        var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
 
         using var command = new SqlCommand(sql, connection);
         _ = command.Parameters.AddWithValue("@begin_lsn", beginLsn);
