@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using MsSqlCdc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,8 +9,6 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using MsSqlCdc;
 
 namespace Example;
 
@@ -17,32 +17,24 @@ public class Program
     public static void Main(string[] args)
     {
         var connectionString = CreateConnectionString();
-        var pollingIntervalMs = 100;
+        var pollingIntervalMs = 1000;
         var tables = new List<string> { "dbo_Employee" };
-        var cdcCancellation = new CancellationTokenSource();
+        using var cdcCancellation = new CancellationTokenSource();
         var cdcCancellationToken = cdcCancellation.Token;
 
         var changeDataChannel = Channel.CreateUnbounded<IReadOnlyCollection<AllChangeRow>>();
-        _ = Task.Factory.StartNew(async () =>
+        _ = Task.Run(async () =>
         {
+            cdcCancellationToken.ThrowIfCancellationRequested();
             var lowBoundLsn = await GetStartLsn(connectionString);
             while (true)
             {
-                if (cdcCancellationToken.IsCancellationRequested)
-                {
-                    // We mark the channel as completed to notify that all consumers should
-                    // read the last elements and stop.
-                    changeDataChannel.Writer.Complete();
-                    break;
-                }
-
                 using var connection = new SqlConnection(connectionString);
                 try
                 {
                     await connection.OpenAsync();
 
                     var highBoundLsn = await Cdc.GetMaxLsn(connection);
-
                     if (lowBoundLsn <= highBoundLsn)
                     {
                         Console.WriteLine($"Polling with from '{lowBoundLsn}' to '{highBoundLsn}");
@@ -62,13 +54,15 @@ public class Program
                     }
                     else
                     {
-                        // No changes
                         Console.WriteLine($"No changes since last poll '{lowBoundLsn}'");
                     }
                 }
-                catch (Exception e)
+                catch (OperationCanceledException)
                 {
-                    Console.WriteLine(e.Message);
+                    // We mark the channel as completed to notify that all consumers should
+                    // read the last elements and stop.
+                    changeDataChannel.Writer.Complete();
+                    break;
                 }
                 finally
                 {
@@ -87,7 +81,7 @@ public class Program
             }
         };
 
-        _ = Task.Factory.StartNew(async () =>
+        _ = Task.Run(async () =>
         {
             await foreach (var changes in changeDataChannel.Reader.ReadAllAsync())
             {
@@ -96,6 +90,7 @@ public class Program
             }
         });
 
+        Console.WriteLine("Press any key to stop.");
         Console.ReadKey();
         cdcCancellation.Cancel();
     }
