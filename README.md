@@ -1,7 +1,5 @@
 # Microsoft SQL - Change Data Capture (CDC)
 
-NOTE: Still under development, API might change until stable release.
-
 You can get the NuGet package [here.](https://www.nuget.org/packages/MsSqlCdc)
 
 ## Introduction
