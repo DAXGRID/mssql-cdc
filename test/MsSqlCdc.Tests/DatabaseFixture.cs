@@ -27,7 +27,7 @@ internal class DatabaseFixture
     {
         using var connection = new SqlConnection(CreateConnectionString(MasterDatabaseName));
         connection.Open();
-        var setupSql = File.ReadAllText(GetRootPath("Scripts/SetupDB.sql"));
+        var setupSql = File.ReadAllText(GetFileNameRootPath("Scripts/SetupDB.sql"));
         var server = new Server(new ServerConnection(connection));
         server.ConnectionContext.ExecuteNonQuery(setupSql);
     }
@@ -47,7 +47,7 @@ internal class DatabaseFixture
         cmd.ExecuteNonQuery();
     }
 
-    private static string GetRootPath(string filePath)
+    private static string GetFileNameRootPath(string filePath)
     {
         var absolutePath = Path.IsPathRooted(filePath)
             ? filePath
