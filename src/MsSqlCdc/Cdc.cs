@@ -117,10 +117,8 @@ public static class Cdc
         string captureInstance,
         string columnName)
     {
-        var columnOrdinal = await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName)
-            .ConfigureAwait(false);
-
-        return columnOrdinal ?? -1;
+        return await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName)
+            .ConfigureAwait(false) ?? -1;
     }
 
     /// <summary>
@@ -167,9 +165,8 @@ public static class Cdc
     public static async Task<DateTime> MapLsnToTime(SqlConnection connection, BigInteger lsn)
     {
         var binaryLsn = DataConvert.ConvertLsnBigEndian(lsn);
-        var lsnToTime = await CdcDatabase.MapLsnToTime(connection, binaryLsn).ConfigureAwait(false);
-
-        return lsnToTime ?? throw new CdcException($"Could not convert LSN to time with LSN being '{lsn}'");
+        return await CdcDatabase.MapLsnToTime(connection, binaryLsn).ConfigureAwait(false) ??
+            throw new CdcException($"Could not convert LSN to time with LSN being '{lsn}'");
     }
 
     /// <summary>
