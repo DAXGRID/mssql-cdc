@@ -145,6 +145,7 @@ internal static class CdcDatabase
             endLsn,
             filterOption).ConfigureAwait(false);
     }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage
     ("Security", "CA2100:Review SQL queries for security vulnerabilities",
      Justification = "No user input.")]
