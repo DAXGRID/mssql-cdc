@@ -34,7 +34,7 @@ public class Program
                 {
                     await connection.OpenAsync();
 
-                    var highBoundLsn = await Cdc.GetMaxLsn(connection);
+                    var highBoundLsn = await Cdc.GetMaxLsnAsync(connection);
                     if (lowBoundLsn <= highBoundLsn)
                     {
                         Console.WriteLine($"Polling with from '{lowBoundLsn}' to '{highBoundLsn}");
@@ -42,7 +42,7 @@ public class Program
                         var changes = new List<AllChangeRow>();
                         foreach (var table in tables)
                         {
-                            var changeSets = await Cdc.GetAllChanges(
+                            var changeSets = await Cdc.GetAllChangesAsync(
                                 connection, table, lowBoundLsn, highBoundLsn, AllChangesRowFilterOption.AllUpdateOld);
                             changes.AddRange(changeSets);
                         }
@@ -50,7 +50,7 @@ public class Program
                         var orderedChanges = changes.OrderBy(x => x.SequenceValue).ToList();
                         await changeDataChannel.Writer.WriteAsync(orderedChanges);
 
-                        lowBoundLsn = await Cdc.GetNextLsn(connection, highBoundLsn);
+                        lowBoundLsn = await Cdc.GetNextLsnAsync(connection, highBoundLsn);
                     }
                     else
                     {
@@ -99,8 +99,8 @@ public class Program
     {
         using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
-        var currentMaxLsn = await Cdc.GetMaxLsn(connection);
-        return await Cdc.GetNextLsn(connection, currentMaxLsn);
+        var currentMaxLsn = await Cdc.GetMaxLsnAsync(connection);
+        return await Cdc.GetNextLsnAsync(connection, currentMaxLsn);
     }
 
     private static string CreateConnectionString()
