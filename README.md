@@ -19,7 +19,7 @@ Get the start_lsn column value for the specified capture instance from the cdc.c
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var minLsn = await Cdc.GetMinLsn(connection, "dbo_Employee");
+var minLsn = await Cdc.GetMinLsnAsync(connection, "dbo_Employee");
 ```
 
 ### Get max LSN
@@ -29,7 +29,7 @@ Get the maximum log sequence number (LSN) from the start_lsn column in the cdc.l
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var maxLsn = await Cdc.GetMaxLsn(connection);
+var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 ```
 
 ### Get previous LSN
@@ -39,7 +39,7 @@ Get the previous log sequence number (LSN) in the sequence based upon the specif
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var previousLsn = await Cdc.GetPreviousLsn(connection, 120000);
+var previousLsn = await Cdc.GetPreviousLsnAsync(connection, 120000);
 ```
 
 ### Get next LSN
@@ -49,7 +49,7 @@ Get the next log sequence number (LSN) in the sequence based upon the specified 
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var nextLsn = await Cdc.GetNextLsn(connection, 120000);
+var nextLsn = await Cdc.GetNextLsnAsync(connection, 120000);
 ```
 
 ### Map time to LSN
@@ -59,7 +59,7 @@ Map the log sequence number (LSN) value from the start_lsn column in the cdc.lsn
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var lsn = await Cdc.MapTimeToLsn(connection, DateTime.UtcNow, RelationalOperator.LargestLessThan);
+var lsn = await Cdc.MapTimeToLsnAsync(connection, DateTime.UtcNow, RelationalOperator.LargestLessThan);
 ```
 
 ### Map LSN to time
@@ -69,7 +69,7 @@ Map date and time value from the tran_end_time column in the cdc.lsn_time_mappin
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var time = await Cdc.MapLsnToTime(connection, 120000);
+var time = await Cdc.MapLsnToTimeAsync(connection, 120000);
 ```
 
 ### Get all changes
@@ -79,7 +79,7 @@ Get one row for each change applied to the source table within the specified log
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var allChanges = await Cdc.GetAllChanges(connection, "dbo_Employee", 120000, 120020);
+var allChanges = await Cdc.GetAllChangesAsync(connection, "dbo_Employee", 120000, 120020);
 ```
 
 ### Get net changes
@@ -89,7 +89,7 @@ Get one net change row for each source row changed within the specified Log Sequ
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var netChanges = await Cdc.GetNetChanges(connection, "dbo_Employee", 120000, 120020);
+var netChanges = await Cdc.GetNetChangesAsync(connection, "dbo_Employee", 120000, 120020);
 ```
 
 ### Get column ordinal
@@ -99,7 +99,7 @@ Get the column ordinal of the specified column as it appears in the change table
 ```c#
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
-var columnOrdinal = await Cdc.GetColumnOrdinal(connection, "dbo_Employee", "Salary");
+var columnOrdinal = await Cdc.GetColumnOrdinalAsync(connection, "dbo_Employee", "Salary");
 ```
 
 ### Has column changed
@@ -112,11 +112,11 @@ var captureInstance = "dbo_Employee";
 using var connection = new SqlConnection("myConnectionString");
 await connection.OpenAsync();
 
-var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-var maxLsn = await Cdc.GetMaxLsn(connection);
+var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
-var changes = await Cdc.GetAllChanges(
+var columnOrdinal = await Cdc.GetColumnOrdinalAsync(connection, captureInstance, columnName);
+var changes = await Cdc.GetAllChangesAsync(
                       connection,
                       captureInstance,
                       minLsn,
@@ -126,7 +126,7 @@ var changes = await Cdc.GetAllChanges(
 // We just pick the first one here as an example.
 var updateMask = changes.First().GetUpdateMask();
 
-var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+var hasColumnChanged = await Cdc.HasColumnChangedAsync(connection, captureInstance, columnName, updateMask);
 ```
 
 ## Setup CDC on MS-SQL Server

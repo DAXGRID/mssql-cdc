@@ -7,7 +7,7 @@ namespace MsSqlCdc;
 
 internal static class CdcDatabase
 {
-    public static async Task<bool?> HasColumnChanged(
+    public static async Task<bool?> HasColumnChangedAsync(
         SqlConnection connection,
         string captureInstance,
         string columnName,
@@ -25,7 +25,7 @@ internal static class CdcDatabase
         return hasColumnChanged != DBNull.Value ? (bool?)hasColumnChanged : null;
     }
 
-    public static async Task<int?> GetColumnOrdinal(
+    public static async Task<int?> GetColumnOrdinalAsync(
         SqlConnection connection,
         string captureInstance,
         string columnName)
@@ -53,7 +53,7 @@ internal static class CdcDatabase
         return lsnTime != DBNull.Value ? (DateTime?)lsnTime : null;
     }
 
-    public static async Task<byte[]?> MapTimeToLsn(
+    public static async Task<byte[]?> MapTimeToLsnAsync(
         SqlConnection connection,
         DateTime trackingTime,
         string relationOperator)
@@ -69,7 +69,7 @@ internal static class CdcDatabase
         return lsnBasedOnTime != DBNull.Value ? (byte[]?)lsnBasedOnTime : null;
     }
 
-    public static async Task<byte[]?> GetMinLsn(SqlConnection connection, string captureInstance)
+    public static async Task<byte[]?> GetMinLsnAsync(SqlConnection connection, string captureInstance)
     {
         var sql = "SELECT sys.fn_cdc_get_min_lsn(@capture_instance)";
 
@@ -81,7 +81,7 @@ internal static class CdcDatabase
         return minLsn != DBNull.Value ? (byte[]?)minLsn : null;
     }
 
-    public static async Task<byte[]?> GetMaxLsn(SqlConnection connection)
+    public static async Task<byte[]?> GetMaxLsnAsync(SqlConnection connection)
     {
         var sql = "SELECT sys.fn_cdc_get_max_lsn()";
         using var command = new SqlCommand(sql, connection);
@@ -90,7 +90,7 @@ internal static class CdcDatabase
         return maxLsn != DBNull.Value ? (byte[]?)maxLsn : null;
     }
 
-    public static async Task<byte[]?> DecrementLsn(SqlConnection connection, byte[] lsn)
+    public static async Task<byte[]?> DecrementLsnAsync(SqlConnection connection, byte[] lsn)
     {
         var sql = "SELECT sys.fn_cdc_decrement_lsn(@lsn)";
 
@@ -102,7 +102,7 @@ internal static class CdcDatabase
         return decrementedLsn != DBNull.Value ? (byte[]?)decrementedLsn : null;
     }
 
-    public static async Task<byte[]?> IncrementLsn(SqlConnection connection, byte[] lsn)
+    public static async Task<byte[]?> IncrementLsnAsync(SqlConnection connection, byte[] lsn)
     {
         var sql = "SELECT sys.fn_cdc_increment_lsn(@lsn)";
 
@@ -114,14 +114,14 @@ internal static class CdcDatabase
         return incrementedLsn != DBNull.Value ? (byte[]?)incrementedLsn : null;
     }
 
-    public static async Task<List<IReadOnlyDictionary<string, object>>> GetAllChanges(
+    public static async Task<List<IReadOnlyDictionary<string, object>>> GetAllChangesAsync(
         SqlConnection connection,
         string captureInstance,
         byte[] beginLsn,
         byte[] endLsn,
         string filterOption)
     {
-        return await GetChanges(
+        return await GetChangesAsync(
             connection,
             "cdc.fn_cdc_get_all_changes",
             captureInstance,
@@ -130,14 +130,14 @@ internal static class CdcDatabase
             filterOption).ConfigureAwait(false);
     }
 
-    public static async Task<List<IReadOnlyDictionary<string, object>>> GetNetChanges(
+    public static async Task<List<IReadOnlyDictionary<string, object>>> GetNetChangesAsync(
         SqlConnection connection,
         string captureInstance,
         byte[] beginLsn,
         byte[] endLsn,
         string filterOption)
     {
-        return await GetChanges(
+        return await GetChangesAsync(
             connection,
             "cdc.fn_cdc_get_net_changes",
             captureInstance,
@@ -149,7 +149,7 @@ internal static class CdcDatabase
     [System.Diagnostics.CodeAnalysis.SuppressMessage
     ("Security", "CA2100:Review SQL queries for security vulnerabilities",
      Justification = "No user input.")]
-    private static async Task<List<IReadOnlyDictionary<string, object>>> GetChanges(
+    private static async Task<List<IReadOnlyDictionary<string, object>>> GetChangesAsync(
         SqlConnection connection,
         string cdcFunction,
         string captureInstance,

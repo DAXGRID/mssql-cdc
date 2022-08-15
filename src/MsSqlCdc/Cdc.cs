@@ -82,13 +82,13 @@ public static class Cdc
     /// Returns whether the specified update mask indicates that the specified column
     /// has been updated in the associated change row.
     /// </returns>
-    public static async Task<bool> HasColumnChanged(
+    public static async Task<bool> HasColumnChangedAsync(
         SqlConnection connection,
         string captureInstance,
         string columnName,
         byte[] updateMask)
     {
-        var hasColumnChanged = await CdcDatabase.HasColumnChanged(
+        var hasColumnChanged = await CdcDatabase.HasColumnChangedAsync(
             connection, captureInstance, columnName, updateMask).ConfigureAwait(false);
 
         return hasColumnChanged ?? throw new CdcException(
@@ -112,12 +112,12 @@ public static class Cdc
     /// table associated with the specified capture instance.
     /// If the column ordinal could not be found -1 is returned.
     /// </returns>
-    public static async Task<int> GetColumnOrdinal(
+    public static async Task<int> GetColumnOrdinalAsync(
         SqlConnection connection,
         string captureInstance,
         string columnName)
     {
-        return await CdcDatabase.GetColumnOrdinal(connection, captureInstance, columnName)
+        return await CdcDatabase.GetColumnOrdinalAsync(connection, captureInstance, columnName)
             .ConfigureAwait(false) ?? -1;
     }
 
@@ -135,13 +135,13 @@ public static class Cdc
     /// Returns the log sequence number (LSN) value from the start_lsn column
     /// in the cdc.lsn_time_mapping system table for the specified time.
     /// </returns>
-    public static async Task<BigInteger> MapTimeToLsn(
+    public static async Task<BigInteger> MapTimeToLsnAsync(
         SqlConnection connection,
         DateTime trackingTime,
         RelationalOperator relationalOperator)
     {
         var convertedRelationOperator = DataConvert.ConvertRelationOperator(relationalOperator);
-        var lsnBytes = await CdcDatabase.MapTimeToLsn(
+        var lsnBytes = await CdcDatabase.MapTimeToLsnAsync(
             connection, trackingTime, convertedRelationOperator).ConfigureAwait(false);
 
         return lsnBytes is not null
@@ -162,7 +162,7 @@ public static class Cdc
     /// Returns the date and time value from the tran_end_time column in the cdc.lsn_time_mapping
     /// system table for the specified log sequence number (LSN).
     /// </returns>
-    public static async Task<DateTime> MapLsnToTime(SqlConnection connection, BigInteger lsn)
+    public static async Task<DateTime> MapLsnToTimeAsync(SqlConnection connection, BigInteger lsn)
     {
         var binaryLsn = DataConvert.ConvertLsnBigEndian(lsn);
         return await CdcDatabase.MapLsnToTime(connection, binaryLsn).ConfigureAwait(false) ??
@@ -176,9 +176,9 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="captureInstance">The name of the capture instance.</param>
     /// <returns>Return the low endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<BigInteger> GetMinLsn(SqlConnection connection, string captureInstance)
+    public static async Task<BigInteger> GetMinLsnAsync(SqlConnection connection, string captureInstance)
     {
-        var minLsnBytes = await CdcDatabase.GetMinLsn(connection, captureInstance).ConfigureAwait(false);
+        var minLsnBytes = await CdcDatabase.GetMinLsnAsync(connection, captureInstance).ConfigureAwait(false);
 
         return minLsnBytes is not null
             ? DataConvert.ConvertBinaryLsn(minLsnBytes)
@@ -193,9 +193,9 @@ public static class Cdc
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<BigInteger> GetMaxLsn(SqlConnection connection)
+    public static async Task<BigInteger> GetMaxLsnAsync(SqlConnection connection)
     {
-        var maxLsnBytes = await CdcDatabase.GetMaxLsn(connection).ConfigureAwait(false);
+        var maxLsnBytes = await CdcDatabase.GetMaxLsnAsync(connection).ConfigureAwait(false);
 
         return maxLsnBytes is not null
             ? DataConvert.ConvertBinaryLsn(maxLsnBytes)
@@ -208,10 +208,10 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the previous LSN.</param>
     /// <returns>Return the high endpoint of the change data capture timeline for any capture instance.</returns>
-    public static async Task<BigInteger> GetPreviousLsn(SqlConnection connection, BigInteger lsn)
+    public static async Task<BigInteger> GetPreviousLsnAsync(SqlConnection connection, BigInteger lsn)
     {
         var binaryLsn = DataConvert.ConvertLsnBigEndian(lsn);
-        var previousLsnBytes = await CdcDatabase.DecrementLsn(connection, binaryLsn).ConfigureAwait(false);
+        var previousLsnBytes = await CdcDatabase.DecrementLsnAsync(connection, binaryLsn).ConfigureAwait(false);
 
         return previousLsnBytes is not null
             ? DataConvert.ConvertBinaryLsn(previousLsnBytes)
@@ -224,10 +224,10 @@ public static class Cdc
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="lsn">The LSN number that should be used as the point to get the next LSN.</param>
     /// <returns>Get the next log sequence number (LSN) in the sequence based upon the specified LSN.</returns>
-    public static async Task<BigInteger> GetNextLsn(SqlConnection connection, BigInteger lsn)
+    public static async Task<BigInteger> GetNextLsnAsync(SqlConnection connection, BigInteger lsn)
     {
         var lsnBinary = DataConvert.ConvertLsnBigEndian(lsn);
-        var nextLsnBytes = await CdcDatabase.IncrementLsn(connection, lsnBinary).ConfigureAwait(false);
+        var nextLsnBytes = await CdcDatabase.IncrementLsnAsync(connection, lsnBinary).ConfigureAwait(false);
 
         return nextLsnBytes is not null
             ? DataConvert.ConvertBinaryLsn(nextLsnBytes)
@@ -244,7 +244,7 @@ public static class Cdc
     /// <returns>
     /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </returns>
-    public static async Task<IReadOnlyCollection<NetChangeRow>> GetNetChanges(
+    public static async Task<IReadOnlyCollection<NetChangeRow>> GetNetChangesAsync(
         SqlConnection connection,
         string captureInstance,
         BigInteger fromLsn,
@@ -254,7 +254,7 @@ public static class Cdc
         var beginLsnBinary = DataConvert.ConvertLsnBigEndian(fromLsn);
         var endLsnBinary = DataConvert.ConvertLsnBigEndian(toLsn);
         var filterOption = DataConvert.ConvertNetChangesRowFilterOption(netChangesRowFilterOption);
-        var cdcColumns = await CdcDatabase.GetNetChanges(
+        var cdcColumns = await CdcDatabase.GetNetChangesAsync(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption).ConfigureAwait(false);
 
         return cdcColumns.Select(x => NetChangeRowFactory.Create(x, captureInstance)).ToList();
@@ -272,7 +272,7 @@ public static class Cdc
     /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
     /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
     /// </returns>
-    public static async Task<IReadOnlyCollection<AllChangeRow>> GetAllChanges(
+    public static async Task<IReadOnlyCollection<AllChangeRow>> GetAllChangesAsync(
         SqlConnection connection,
         string captureInstance,
         BigInteger beginLsn,
@@ -282,7 +282,7 @@ public static class Cdc
         var beginLsnBinary = DataConvert.ConvertLsnBigEndian(beginLsn);
         var endLsnBinary = DataConvert.ConvertLsnBigEndian(endLsn);
         var filterOption = DataConvert.ConvertAllChangesRowFilterOption(allChangesRowFilterOption);
-        var cdcColumns = await CdcDatabase.GetAllChanges(
+        var cdcColumns = await CdcDatabase.GetAllChangesAsync(
             connection, captureInstance, beginLsnBinary, endLsnBinary, filterOption).ConfigureAwait(false);
 
         return cdcColumns.Select(x => AllChangeRowFactory.Create(x, captureInstance)).ToList();

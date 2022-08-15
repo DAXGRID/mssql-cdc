@@ -16,7 +16,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
 
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
 
         minLsn.Should().NotBe(default);
     }
@@ -27,7 +27,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         using var connection = await CreateOpenSqlConnection();
 
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
         maxLsn.Should().NotBe(default);
     }
@@ -38,9 +38,9 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         using var connection = await CreateOpenSqlConnection();
         // We use the max LSN to get an realistic LSN number for testing.
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var previousLsn = await Cdc.GetPreviousLsn(connection, maxLsn);
+        var previousLsn = await Cdc.GetPreviousLsnAsync(connection, maxLsn);
 
         previousLsn.Should()
             .BeLessThan(maxLsn).And
@@ -53,9 +53,9 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         using var connection = await CreateOpenSqlConnection();
         // We use the max LSN to get an realistic LSN number for testing.
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var previousLsn = await Cdc.GetNextLsn(connection, maxLsn);
+        var previousLsn = await Cdc.GetNextLsnAsync(connection, maxLsn);
 
         previousLsn.Should()
             .BeGreaterThan(maxLsn).And
@@ -73,7 +73,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         using var connection = await CreateOpenSqlConnection();
         var now = DateTime.UtcNow.AddSeconds(secondsFromNow);
 
-        var lsn = await Cdc.MapTimeToLsn(connection, now, relationalOperator);
+        var lsn = await Cdc.MapTimeToLsnAsync(connection, now, relationalOperator);
 
         lsn.Should().NotBe(default);
     }
@@ -84,9 +84,9 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         using var connection = await CreateOpenSqlConnection();
         // We use the max LSN to get an realistic LSN number for testing.
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var time = await Cdc.MapLsnToTime(connection, maxLsn);
+        var time = await Cdc.MapLsnToTimeAsync(connection, maxLsn);
 
         time.ToUniversalTime().Should()
             .NotBe(default).And
@@ -100,10 +100,10 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
 
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var allChanges = await Cdc.GetAllChanges(
+        var allChanges = await Cdc.GetAllChangesAsync(
             connection,
             captureInstance,
             minLsn,
@@ -143,10 +143,10 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
 
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var allChanges = await Cdc.GetAllChanges(
+        var allChanges = await Cdc.GetAllChangesAsync(
             connection,
             captureInstance,
             minLsn,
@@ -195,10 +195,10 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var netChanges = await Cdc.GetNetChanges(
+        var netChanges = await Cdc.GetNetChangesAsync(
             connection,
             "dbo_Employee",
             minLsn,
@@ -226,10 +226,10 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var netChanges = await Cdc.GetNetChanges(
+        var netChanges = await Cdc.GetNetChangesAsync(
             connection,
             "dbo_Employee",
             minLsn,
@@ -259,10 +259,10 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var netChanges = await Cdc.GetNetChanges(
+        var netChanges = await Cdc.GetNetChangesAsync(
             connection,
             "dbo_Employee",
             minLsn,
@@ -293,7 +293,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
 
-        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
+        var columnOrdinal = await Cdc.GetColumnOrdinalAsync(connection, captureInstance, columnName);
 
         columnOrdinal.Should().Be(expected);
     }
@@ -307,7 +307,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
 
-        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
+        var columnOrdinal = await Cdc.GetColumnOrdinalAsync(connection, captureInstance, columnName);
 
         columnOrdinal.Should().Be(-1);
     }
@@ -320,11 +320,11 @@ public class CdcTests : IClassFixture<DatabaseFixture>
     {
         var captureInstance = "dbo_Employee";
         using var connection = await CreateOpenSqlConnection();
-        var minLsn = await Cdc.GetMinLsn(connection, captureInstance);
-        var maxLsn = await Cdc.GetMaxLsn(connection);
+        var minLsn = await Cdc.GetMinLsnAsync(connection, captureInstance);
+        var maxLsn = await Cdc.GetMaxLsnAsync(connection);
 
-        var columnOrdinal = await Cdc.GetColumnOrdinal(connection, captureInstance, columnName);
-        var changes = await Cdc.GetAllChanges(
+        var columnOrdinal = await Cdc.GetColumnOrdinalAsync(connection, captureInstance, columnName);
+        var changes = await Cdc.GetAllChangesAsync(
                               connection,
                               captureInstance,
                               minLsn,
@@ -333,7 +333,7 @@ public class CdcTests : IClassFixture<DatabaseFixture>
 
         var updateMask = changes.Last().GetUpdateMask();
 
-        var hasColumnChanged = await Cdc.HasColumnChanged(connection, captureInstance, columnName, updateMask);
+        var hasColumnChanged = await Cdc.HasColumnChangedAsync(connection, captureInstance, columnName, updateMask);
 
         hasColumnChanged.Should().Be(expected);
     }
