@@ -14,7 +14,7 @@ namespace Example;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var connectionString = CreateConnectionString();
         var pollingIntervalMs = 1000;
@@ -37,7 +37,7 @@ public class Program
                     var highBoundLsn = await Cdc.GetMaxLsnAsync(connection);
                     if (lowBoundLsn <= highBoundLsn)
                     {
-                        Console.WriteLine($"Polling with from '{lowBoundLsn}' to '{highBoundLsn}");
+                        Console.WriteLine($"Polling from '{lowBoundLsn}' to '{highBoundLsn}'.");
 
                         var changes = new List<AllChangeRow>();
                         foreach (var table in tables)
@@ -54,7 +54,7 @@ public class Program
                     }
                     else
                     {
-                        Console.WriteLine($"No changes since last poll '{lowBoundLsn}'");
+                        Console.WriteLine($"No changes since last poll '{lowBoundLsn}'.");
                     }
                 }
                 catch (OperationCanceledException)
@@ -64,13 +64,16 @@ public class Program
                     changeDataChannel.Writer.Complete();
                     break;
                 }
-                finally
+                catch (Exception ex)
                 {
-                    await connection.CloseAsync();
-                    await Task.Delay(pollingIntervalMs);
+                    Console.WriteLine($"Error: {ex}");
+                    changeDataChannel.Writer.Complete();
+                    break;
                 }
+
+                await Task.Delay(pollingIntervalMs, cdcCancellationToken);
             }
-        }, cdcCancellationToken);
+        });
 
         var options = new JsonSerializerOptions
         {
@@ -81,18 +84,12 @@ public class Program
             }
         };
 
-        _ = Task.Run(async () =>
+        Console.WriteLine("Starting consuming changes...");
+        await foreach (var changes in changeDataChannel.Reader.ReadAllAsync())
         {
-            await foreach (var changes in changeDataChannel.Reader.ReadAllAsync())
-            {
-                var changeDataJson = JsonSerializer.Serialize(changes, options);
-                Console.WriteLine(changeDataJson + "\n");
-            }
-        });
-
-        Console.WriteLine("Press any key to stop.");
-        Console.ReadKey();
-        cdcCancellation.Cancel();
+            var changeDataJson = JsonSerializer.Serialize(changes, options);
+            Console.WriteLine(changeDataJson + "\n");
+        }
     }
 
     private static async Task<BigInteger> GetStartLsn(string connectionString)
