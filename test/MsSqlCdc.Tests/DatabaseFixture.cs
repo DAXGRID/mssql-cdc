@@ -7,7 +7,8 @@ using System.Threading;
 
 namespace MsSqlCdc.Tests;
 
-internal class DatabaseFixture
+// This needs to be public, otherwise the test framework won't recognize it.
+public sealed class DatabaseFixture
 {
     private const string MasterDatabaseName = "master";
     private const string TestDatabaseName = "mssql_cdc_test";
