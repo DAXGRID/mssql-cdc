@@ -9,6 +9,9 @@ namespace MsSqlCdc.Tests;
 
 public class CdcTests : IClassFixture<DatabaseFixture>
 {
+    // This constructor is needed for fixture to be executed.
+    public CdcTests(DatabaseFixture _) { }
+
     [Fact]
     [Trait("Category", "Integration")]
     public async Task Get_min_lsn()
