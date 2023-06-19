@@ -4,7 +4,7 @@ You can get the NuGet package [here.](https://www.nuget.org/packages/MsSqlCdc)
 
 ## Introduction
 
-The MS-SQL change data capture library, simplifies using MS-SQL-CDC by providing a simplified API to interact with the SQL functions for MS-SQL-CDC. The API has intentionally been made very simplistic, to enable the consumer to write their own abstraction if needed.
+This library streamlines the utilization of MS-SQL-CDC by offering a simplified API that facilitates interaction with the SQL functions specific to MS-SQL-CDC. The design of the API deliberately prioritizes simplicity, empowering users to develop their own abstractions if necessary.
 
 ### Examples
 
