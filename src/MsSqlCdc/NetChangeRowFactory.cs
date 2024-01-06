@@ -8,7 +8,7 @@ namespace MsSqlCdc;
 internal static class NetChangeRowFactory
 {
     /// <summary>
-    /// Converts a a collection of columns represented as Dictionary<string, object> to ChangeData representation.
+    /// Converts a a collection of columns represented as a `Dictionary` to `ChangeData` representation.
     /// </summary>
     /// <param name="fields">Dictionary of field name and field value.</param>
     /// <param name="captureInstance">The capture instance.</param>
