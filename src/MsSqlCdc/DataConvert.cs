@@ -9,7 +9,7 @@ internal static class DataConvert
     /// <summary>
     /// Converts RelationOperator enum to a string representation to be used in MS-SQL.
     /// </summary>
-    /// <param name="representation">The enum representation of RelationOperator.</param>
+    /// <param name="relationalOperator">The enum representation of RelationOperator.</param>
     /// <returns>String representation of RelationOperator.</returns>
     /// <exception cref="ArgumentException"></exception>
     public static string ConvertRelationOperator(RelationalOperator relationalOperator)
@@ -25,7 +25,7 @@ internal static class DataConvert
     /// <summary>
     /// Converts NetChangesRowFilterOption enum to a string representation to be used in MS-SQL.
     /// </summary>
-    /// <param name="representation">The enum representation of NetChangesRowFilterOption.</param>
+    /// <param name="netChangesRowFilterOption">The enum representation of NetChangesRowFilterOption.</param>
     /// <returns>String representation of NetChangesRowfilterOption.</returns>
     /// <exception cref="ArgumentException"></exception>
     public static string ConvertNetChangesRowFilterOption(
@@ -40,7 +40,7 @@ internal static class DataConvert
     /// <summary>
     /// Converts AllChangesRowFilterOption enum to a string representation to be used in MS-SQL.
     /// </summary>
-    /// <param name="representation">The enum representation of AllChangesRowFilterOption.</param>
+    /// <param name="allChangesRowFilterOption">The enum representation of AllChangesRowFilterOption.</param>
     /// <returns>String representation of AllChangesRowFilterOption.</returns>
     /// <exception cref="ArgumentException"></exception>
     public static string ConvertAllChangesRowFilterOption(
@@ -55,7 +55,7 @@ internal static class DataConvert
     /// Convert LSN BigInteger to ByteArray in BigEndian format,
     /// Also makes sure that the size of the returned byte array is always 10 bytes.
     /// </summary>
-    /// <param name="representation">BigInteger representation of LSN.</param>
+    /// <param name="lsn">BigInteger representation of LSN.</param>
     /// <returns>Binary array of BigInteger LSN.</returns>
     public static byte[] ConvertLsnBigEndian(BigInteger lsn)
     {

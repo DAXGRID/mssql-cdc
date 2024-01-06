@@ -241,6 +241,7 @@ public static class Cdc
     /// <param name="captureInstance">The name of the capture instance.</param>
     /// <param name="fromLsn">The LSN that represents the low endpoint of the LSN range to include in the result set.</param>
     /// <param name="toLsn">The LSN that represents the high endpoint of the LSN range to include in the result set.</param>
+    /// <param name="netChangesRowFilterOption">An option to filter the change rows.</param>
     /// <returns>
     /// Returns one net change row for each source row changed within the specified Log Sequence Numbers (LSN) range.
     /// </returns>
@@ -266,8 +267,9 @@ public static class Cdc
     /// </summary>
     /// <param name="connection">An open connection to a MS-SQL database.</param>
     /// <param name="captureInstance">The name of the capture instance.</param>
-    /// <param name="fromLsn">The LSN that represents the low endpoint of the LSN range to include in the result set.</param>
-    /// <param name="toLsn">The LSN that represents the high endpoint of the LSN range to include in the result set.</param>
+    /// <param name="beginLsn">The LSN that represents the low endpoint of the LSN range to include in the result set.</param>
+    /// <param name="endLsn">The LSN that represents the high endpoint of the LSN range to include in the result set.</param>
+    /// <param name="allChangesRowFilterOption">An option to filter the change rows.</param>
     /// <returns>
     /// Returns one row for each change applied to the source table within the specified log sequence number (LSN) range.
     /// If a source row had multiple changes during the interval, each change is represented in the returned result set.
