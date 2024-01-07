@@ -38,3 +38,7 @@ dotnet_diagnostic.IDE0005.severity = silent
 # IDE0290: Use primary constructor
 # We do not care about using primary constructors.
 dotnet_diagnostic.IDE0290.severity = silent
+
+# xUnit1042: The member referenced by the MemberData attribute returns untyped data rows, such as object[]. Consider using TheoryData<> as the return type to provide better type safety.
+# We do not care about this, since ours MemberData uses the object type.
+dotnet_diagnostic.xUnit1042.severity = silent
