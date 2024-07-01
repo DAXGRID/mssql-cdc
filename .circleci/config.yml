@@ -14,7 +14,7 @@ executors:
       auth:
         username: $DOCKER_LOGIN
         password: $DOCKER_ACCESSTOKEN
-    - image: mcr.microsoft.com/mssql/server:2019-CU13-ubuntu-20.04 # For integration testing
+    - image: mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04 # For integration testing
       auth:
         username: $DOCKER_LOGIN
         password: $DOCKER_ACCESSTOKEN

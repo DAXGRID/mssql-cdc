@@ -181,5 +181,5 @@ dotnet test --filter Category=Integration
 To run the integration tests, a running MS-SQL database is required. You can use the docker command below to set up a local MS-SQL database to run the integration tests against.
 
 ```sh
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=myAwesomePassword1" -e "MSSQL_AGENT_ENABLED=True"  -p 1433:1433 -d  mcr.microsoft.com/mssql/server:2019-CU13-ubuntu-20.04
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=myAwesomePassword1" -e "MSSQL_AGENT_ENABLED=True"  -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04
 ```
