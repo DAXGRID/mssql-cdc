@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MsSqlCdc;
@@ -145,6 +146,13 @@ internal static class CdcDatabase
             endLsn,
             filterOption).ConfigureAwait(false);
     }
+    private static string EscapeSqlServerObjectName(string objectName, string sqlObjectNamePartSeparator = ".")
+    {
+        return string
+        .Join(sqlObjectNamePartSeparator, objectName
+        .Split(sqlObjectNamePartSeparator)
+        .Select(namePart => $"[{namePart}]"));
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage
     ("Security", "CA2100:Review SQL queries for security vulnerabilities",
@@ -157,7 +165,8 @@ internal static class CdcDatabase
         byte[] endLsn,
         string filterOption)
     {
-        var sql = $"SELECT * FROM {cdcFunction}_{captureInstance}(@begin_lsn, @end_lsn, @filter_option)";
+        var escapedCdcFunctionFullName = EscapeSqlServerObjectName($"{cdcFunction}_{captureInstance}");
+        var sql = $"SELECT * FROM {escapedCdcFunctionFullName} (@begin_lsn, @end_lsn, @filter_option)";
 
         using var command = new SqlCommand(sql, connection);
         _ = command.Parameters.AddWithValue("@begin_lsn", beginLsn);
